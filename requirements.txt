@@ -1,0 +1,8 @@
+# The order of packages is significant, because pip processes them in the order
+# of appearance. Changing the order has an impact on the overall integration
+# process
+pbr!=2.1.0,>=2.0.0 # Apache-2.0
+flask>=1.0.2 # BSD
+github-webhook>=1.0.2 # Apache-2.0
+PyYAML>=3.10.0 # MIT
+PyGithub>=1.43

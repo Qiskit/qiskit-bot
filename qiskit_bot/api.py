@@ -18,9 +18,11 @@ import sys
 from urllib import parse
 
 import flask
+
 import github_webhook
 
 from qiskit_bot import config
+from qiskit_bot import release_process
 from qiskit_bot import repos
 
 
@@ -30,6 +32,7 @@ APP = flask.Flask(__name__)
 WEBHOOK = github_webhook.Webhook(APP)
 
 REPOS = {}
+META_REPO = None
 CONFIG = None
 
 
@@ -45,6 +48,7 @@ def get_app():
 def setup():
     """Setup config."""
     global CONFIG
+    global META_REPO
     if not CONFIG:
         CONFIG = config.load_config('/etc/qiskit_bot.yaml')
     if not os.path.isdir(CONFIG['working_dir']):
@@ -52,6 +56,8 @@ def setup():
     for repo in CONFIG['repos']:
         REPOS[repo] = repos.Repo(CONFIG['working_dir'], repo,
                                  CONFIG['access_token'])
+    META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
+                           CONFIG['access_token'])
 
 
 @APP.route("/", methods=['GET'])
@@ -86,17 +92,14 @@ def on_push(data):
 #    git_url = data['repository']['git_url']
 
 
-def _handle_tag(tag_name, repo):
-    pass
-
-
 @WEBHOOK.hook(event_type='create')
 def on_create(data):
     global REPOS
     if data['ref_type']:
         tag_name = data['ref']
         repo_name = data['repository']['full_name']
-        _handle_tag(tag_name, REPOS[repo_name])
+        release_process.finish_release(tag_name, REPOS[repo_name],
+                                       CONFIG, META_REPO)
 
 
 @WEBHOOK.hook(event_type='pull_request')

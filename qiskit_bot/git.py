@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-  
+
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2019
@@ -30,7 +30,7 @@ def create_branch(branch_name, sha1, repo):
                              cwd=repo.local_path)
         LOG.debug('Branch create %s for %s, stdout:\n%s\nstderr:\n%s' % (
             branch_name, repo.local_path, res.stdout, res.stderr))
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         LOG.exception('Failed to create a local branch')
         return False
     try:
@@ -41,7 +41,19 @@ def create_branch(branch_name, sha1, repo):
                              cwd=repo.local_path)
         LOG.debug('Branch push %s for %s, stdout:\n%s\nstderr:\n%s' % (
             branch_name, repo.local_path, res.stdout, res.stderr))
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         LOG.exception('Failed to push branch to github')
         return False
     return True
+
+
+def get_git_log(repo, sha1):
+    LOG.info('Querying git log of %s for %s' % (sha1, repo.local_path))
+    try:
+        res = subprocess.run(['git', 'log', '--oneline', sha1],
+                             capture_output=True, check=True,
+                             cwd=repo.local_path)
+        return res.stdout
+    except subprocess.CalledProcessError:
+        LOG.exception('Failed to get git log')
+        return ''

@@ -24,9 +24,21 @@ class Repo(object):
     def __init__(self, working_dir, repo_name, access_token):
         self.local_path = os.path.join(working_dir, repo_name)
         self.repo_name = repo_name
+        self.name = self._get_name()
         self.gh_repo = self._get_gh_repo(access_token)
         self._create_repo()
         self._create_ssh_remote()
+
+    def _get_name(self):
+        repo = self.repo_name.split('/')[1]
+        pieces = repo.split('-')
+        name = ''
+        for p in pieces:
+            if p == 'ibmq':
+                name += 'IBMQ '
+            else:
+                name += p.capitalize() + ' '
+        return name
 
     def _create_repo(self):
         LOG.info('Creating local clone of %s at %s' % (self.repo_name,

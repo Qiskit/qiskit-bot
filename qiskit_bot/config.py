@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-  
+
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2019
@@ -15,18 +15,32 @@
 import logging
 
 import voluptuous as vol
+
 import yaml
 
+
 LOG = logging.getLogger(__name__)
+
+
+default_changelog_categories = {
+    'Deprecation': 'Deprecated',
+    'New Feature': 'Added',
+    'API Change': 'Changed',
+    'Removal': 'Removed',
+    'Bugfix': 'Fixed',
+}
+
 
 schema = vol.Schema({
     'api_key': str,
     'working_dir': str,
-    'meta_repo': vol.Optional(str),
+    'meta_repo': vol.Optional(str, default='Qiskit/qiskit'),
     'repos': [{
         'name': str,
         'reno': vol.Optional(bool, default=False),
         'branch_on_release': vol.Optional(bool, default=False),
+        'changelog_categories': vol.Optional(
+            {}, default=default_changelog_categories)
     }],
 })
 
@@ -36,6 +50,6 @@ def load_config(path):
         raw_config = yaml.safe_load(fd.read())
     schema(raw_config)
     LOG.info('Loaded config\nRepos: %s' % ','.join(raw_config['repos']))
-    if 'meta_repo' in repos:
+    if 'meta_repo' in raw_config:
         LOG.info('meta_repo: %s' % raw_config['meta_repo'])
     return raw_config

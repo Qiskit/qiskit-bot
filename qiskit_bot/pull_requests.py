@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-  
+
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2019
@@ -12,11 +12,14 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
+
 def check_preconditions(pr, conditions, repo, conf):
     pass
 
+
 def merge_pr(pr):
     pass
+
 
 def rebase_pr(pr):
     pass

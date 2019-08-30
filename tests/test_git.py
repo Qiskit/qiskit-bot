@@ -4,6 +4,7 @@ import unittest
 
 from qiskit_bot import git
 
+
 class TestGit(unittest.TestCase):
 
     @unittest.mock.patch('subprocess.run',

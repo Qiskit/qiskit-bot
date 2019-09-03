@@ -49,7 +49,8 @@ def load_config(path):
     with open(path, 'r') as fd:
         raw_config = yaml.safe_load(fd.read())
     schema(raw_config)
-    LOG.info('Loaded config\nRepos: %s' % ','.join(raw_config['repos']))
+    LOG.info('Loaded config\nRepos: %s' % ','.join(
+        [x['name'] for x in raw_config['repos']]))
     if 'meta_repo' in raw_config:
         LOG.info('meta_repo: %s' % raw_config['meta_repo'])
     return raw_config

@@ -54,11 +54,13 @@ def setup():
         CONFIG = config.load_config('/etc/qiskit_bot.yaml')
     if not os.path.isdir(CONFIG['working_dir']):
         os.mkdir(CONFIG['working_dir'])
+    if not os.path.isdir(os.path.join(CONFIG['working_dir'], 'lock')):
+        os.mkdir(os.path.join(CONFIG['working_dir'], 'lock'))
     for repo in CONFIG['repos']:
-        REPOS[repo] = repos.Repo(CONFIG['working_dir'], repo,
-                                 CONFIG['access_token'])
+        REPOS[repo['name']] = repos.Repo(CONFIG['working_dir'], repo['name'],
+                                      CONFIG['api_key'])
     META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
-                           CONFIG['access_token'])
+                           CONFIG['api_key'])
 
 
 @APP.route("/", methods=['GET'])
@@ -133,7 +135,7 @@ def main():
     """Run APP."""
     global CONFIG
     CONFIG = config.load_config(sys.argv[1])
-    APP.run(debug=True, host='127.0.0.1', port=80)
+    APP.run(debug=True, host='127.0.0.1', port=8080)
 
 
 if __name__ == "__main__":

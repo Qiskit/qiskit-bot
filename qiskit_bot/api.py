@@ -58,7 +58,7 @@ def setup():
         os.mkdir(os.path.join(CONFIG['working_dir'], 'lock'))
     for repo in CONFIG['repos']:
         REPOS[repo['name']] = repos.Repo(CONFIG['working_dir'], repo['name'],
-                                      CONFIG['api_key'])
+                                         CONFIG['api_key'], repo_config=repo)
     META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
                            CONFIG['api_key'])
 
@@ -138,7 +138,7 @@ def main():
     log_format = ('%(asctime)s.%(msecs)03d %(process)d %(levelname)s '
                   '%(name)s [-] %(message)s')
     logging.basicConfig(level=logging.DEBUG, format=log_format)
-    APP.run(debug=True, host='127.0.0.1', port=8080)
+    APP.run(debug=True, host='0.0.0.0', port=8281)
 
 
 if __name__ == "__main__":

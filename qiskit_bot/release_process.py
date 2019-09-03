@@ -16,11 +16,10 @@ import logging
 import os
 import re
 import subprocess
-import textwrap
 
 import fasteners
-from github import Github
 
+from qiskit_bot import config
 from qiskit_bot import git
 
 LOG = logging.getLogger(__name__)
@@ -88,12 +87,13 @@ Bump the meta repo version to include:
 
 
 def _generate_changelog(repo, log_string, categories):
-    git_log = git.get_git_log(repo, log_string)
+    git.checkout_master(repo, pull=True)
+    git_log = git.get_git_log(repo, log_string).decode('utf8')
     if not git_log:
-        return None
+        return ''
     git_summaries = []
     pr_regex = re.compile(r'^.*\((.*)\)')
-    for line in git_log:
+    for line in git_log.splitlines():
         pieces = line.split(' ')
         if 'tag:' in line:
             summary = ' '.join(pieces[3:])
@@ -110,11 +110,13 @@ def _generate_changelog(repo, log_string, categories):
                 changelog_dict[label].append(summary)
     changelog = "# Changelog\n"
     for label in changelog_dict:
-        changelog.append('## %s\n' % categories[label])
+        if not changelog_dict[label]:
+            continue
+        changelog += '## %s\n' % categories[label]
         for pr in changelog_dict[label]:
-            entry = textwrap.wrap('-   %s' % pr, 79)
-            entry += '\n'
-        changelog.append('\n')
+            entry = '-   %s\n' % pr
+            changelog += entry
+        changelog += ('\n')
     return changelog
 
 
@@ -128,39 +130,43 @@ def finish_release(version_number, repo, conf, meta_repo):
     """Do the post tag release processes."""
     working_dir = conf.get('working_dir')
     lock_dir = os.path.join(working_dir, 'lock')
-    gh_session = Github(conf['api_key'])
-    repo_config = conf['repos'][repo.repo_name]
-    meta_repo = gh_session.get_repo(meta_repo)
+    repo_config = repo.repo_config
     reno_notes = None
     version_number_pieces = version_number.split('.')
     branch_number = '.'.join(version_number_pieces[:2])
     reno_notes = None
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
-        if repo_config['reno']:
+        if repo_config.get('reno'):
             reno_notes = _run_reno(repo.local_path, version_number)
-        if repo_config['branch_on_release']:
+        if repo_config.get('branch_on_release'):
             branch_name = 'stable/%s' % branch_number
             repo_branches = [x.name for x in repo.gh_repo.get_branches()]
-            if version_number_pieces[2] == 0 and \
+            if int(version_number_pieces[2]) == 0 and \
                     branch_name not in repo_branches:
                 git.create_branch(branch_name, version_number, repo, push=True)
         # If a patch release log between 0.A.X..0.A.X-1
-        if version_number_pieces[2] > 0:
+        if int(version_number_pieces[2]) > 0:
+            old_version_string = '%s.%s.%s' % (
+                version_number_pieces[0],
+                version_number_pieces[1],
+                int(version_number_pieces[2]) - 1)
             log_string = '%s...%s' % (
                 version_number,
-                '.'.join(
-                    version_number_pieces[:2] + [
-                        version_number_pieces[2] - 1]))
+                old_version_string)
         # If a minor release log between 0.X.0..0.X-1.0
         else:
+            old_version_string = '%s.%s.%s' % (
+                version_number_pieces[0],
+                int(version_number_pieces[1]) - 1,
+                0)
             log_string = '%s...%s' % (
                 version_number,
-                '.'.join(
-                    version_number_pieces[0] + [
-                        version_number_pieces[1] - 1, 0]))
+                old_version_string)
 
         create_github_release(repo, log_string, version_number,
-                              repo_config['changelog_categories'])
+                              repo_config.get(
+                                  'changelog_categories',
+                                  config.default_changelog_categories))
 
     with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):
         bump_meta(meta_repo, repo, version_number, conf, reno_notes)

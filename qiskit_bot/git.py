@@ -102,7 +102,7 @@ def create_git_commit_for_all(repo, commit_msg):
 
 
 def checkout_master(repo, pull=True):
-    cmd = ['git' 'checkout', 'master']
+    cmd = ['git', 'checkout', 'master']
     LOG.info('Checking out branch of %s' % repo.local_path)
     try:
         res = subprocess.run(cmd, capture_output=True, check=True,

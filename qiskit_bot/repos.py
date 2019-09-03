@@ -21,17 +21,19 @@ LOG = logging.getLogger(__name__)
 
 class Repo(object):
 
-    def __init__(self, working_dir, repo_name, access_token):
+    def __init__(self, working_dir, repo_name, access_token, repo_config=None):
         self.local_path = os.path.join(working_dir, repo_name)
         self.repo_name = repo_name
         self.name = self._get_name()
         self.gh_repo = self._get_gh_repo(access_token)
+        self.repo_config = repo_config
         if not os.path.isdir(self.local_path):
             self._create_repo()
             self._create_ssh_remote()
         else:
             LOG.info('Local repo clone at %s already exists, not creating' %
                      self.local_path)
+        self.ssh_remote = 'github'
 
     def _get_name(self):
         repo = self.repo_name.split('/')[1]

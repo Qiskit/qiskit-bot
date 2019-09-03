@@ -135,6 +135,9 @@ def main():
     """Run APP."""
     global CONFIG
     CONFIG = config.load_config(sys.argv[1])
+    log_format = ('%(asctime)s.%(msecs)03d %(process)d %(levelname)s '
+                  '%(name)s [-] %(message)s')
+    logging.basicConfig(level=logging.DEBUG, format=log_format)
     APP.run(debug=True, host='127.0.0.1', port=8080)
 
 

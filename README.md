@@ -25,4 +25,6 @@ access. This is used for API access to github for the repositories.
 The last piece of github side configuration needed is to configure the webhook.
 You need to configure a webhook for each repository that uses the bot. Setup
 the webhook to send all necessary event types to the endpoint where the bot
-is running.
+is running. Two things to remember is that make sure you send the webhook events
+to the `/postreceive` endpoint off of the server's address and that the
+`Content type` is set to `application/json`.

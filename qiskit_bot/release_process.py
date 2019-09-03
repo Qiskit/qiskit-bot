@@ -18,6 +18,7 @@ import re
 import subprocess
 import textwrap
 
+import fasteners
 from github import Github
 
 from qiskit_bot import git
@@ -125,6 +126,8 @@ def create_github_release(repo, log_string, version_number, categories):
 
 def finish_release(version_number, repo, conf, meta_repo):
     """Do the post tag release processes."""
+    working_dir = conf.get('working_dir')
+    lock_dir = os.path.join(working_dir, 'lock')
     gh_session = Github(conf['api_key'])
     repo_config = conf['repos'][repo.repo_name]
     meta_repo = gh_session.get_repo(meta_repo)
@@ -132,28 +135,33 @@ def finish_release(version_number, repo, conf, meta_repo):
     version_number_pieces = version_number.split('.')
     branch_number = '.'.join(version_number_pieces[:2])
     reno_notes = None
-    if repo_config['reno']:
-        reno_notes = _run_reno(repo.local_path, version_number)
-    if repo_config['branch_on_release']:
-        branch_name = 'stable/%s' % branch_number
-        repo_branches = [x.name for x in repo.gh_repo.get_branches()]
-        if version_number_pieces[2] == 0 and \
-                branch_name not in repo_branches:
-            git.create_branch(branch_name, version_number, repo, push=True)
-    # If a patch release log between 0.A.X..0.A.X-1
-    if version_number_pieces[2] > 0:
-        log_string = '%s...%s' % (
-            version_number,
-            '.'.join(
-                version_number_pieces[:2] + [version_number_pieces[2] - 1]))
-    # If a minor release log between 0.X.0..0.X-1.0
-    else:
-        log_string = '%s...%s' % (
-            version_number,
-            '.'.join(
-                version_number_pieces[0] + [version_number_pieces[1] - 1, 0]))
+    with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
+        if repo_config['reno']:
+            reno_notes = _run_reno(repo.local_path, version_number)
+        if repo_config['branch_on_release']:
+            branch_name = 'stable/%s' % branch_number
+            repo_branches = [x.name for x in repo.gh_repo.get_branches()]
+            if version_number_pieces[2] == 0 and \
+                    branch_name not in repo_branches:
+                git.create_branch(branch_name, version_number, repo, push=True)
+        # If a patch release log between 0.A.X..0.A.X-1
+        if version_number_pieces[2] > 0:
+            log_string = '%s...%s' % (
+                version_number,
+                '.'.join(
+                    version_number_pieces[:2] + [
+                        version_number_pieces[2] - 1]))
+        # If a minor release log between 0.X.0..0.X-1.0
+        else:
+            log_string = '%s...%s' % (
+                version_number,
+                '.'.join(
+                    version_number_pieces[0] + [
+                        version_number_pieces[1] - 1, 0]))
 
-    create_github_release(repo, log_string, version_number,
-                          repo_config['changelog_categories'])
-    bump_meta(meta_repo, repo, version_number, conf, reno_notes)
-    git.checkout_master(repo, pull=True)
+        create_github_release(repo, log_string, version_number,
+                              repo_config['changelog_categories'])
+
+    with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):
+        bump_meta(meta_repo, repo, version_number, conf, reno_notes)
+        git.checkout_master(repo, pull=True)

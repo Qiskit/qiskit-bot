@@ -26,8 +26,12 @@ class Repo(object):
         self.repo_name = repo_name
         self.name = self._get_name()
         self.gh_repo = self._get_gh_repo(access_token)
-        self._create_repo()
-        self._create_ssh_remote()
+        if not os.path.isdir(self.local_path):
+            self._create_repo()
+            self._create_ssh_remote()
+        else:
+            LOG.info('Local repo clone at %s already exists, not creating' %
+                     self.local_path)
 
     def _get_name(self):
         repo = self.repo_name.split('/')[1]

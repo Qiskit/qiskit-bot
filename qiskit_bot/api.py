@@ -98,7 +98,7 @@ def on_push(data):
 @WEBHOOK.hook(event_type='create')
 def on_create(data):
     global REPOS
-    if data['ref_type']:
+    if data['ref_type'] == 'tag':
         tag_name = data['ref']
         repo_name = data['repository']['full_name']
         if repo_name in REPOS:

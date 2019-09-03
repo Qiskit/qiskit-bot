@@ -1,8 +1,12 @@
 # qiskit-bot
 
 This repo contains a wsgi app for running for github automation of the 
-qiskit community. It performs many functions to automate the workflow of the
-qiskit community.
+qiskit organization. It performs many functions to automate the workflow of the
+various aspect of managing the repositories in the qiskit github organization.
+For example, release automation to automatically generate a github release with
+a full changelog from just a git tag and then generate a PR to bump the
+meta-repository based on that tag. The goal of this project is to minimize the
+number of manual actions needed as part of daily maintanence of qiskit.
 
 ## Configuration
 

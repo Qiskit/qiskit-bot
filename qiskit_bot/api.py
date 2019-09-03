@@ -22,6 +22,7 @@ import flask
 import github_webhook
 
 from qiskit_bot import config
+from qiskit_bot import git
 from qiskit_bot import release_process
 from qiskit_bot import repos
 
@@ -98,13 +99,25 @@ def on_create(data):
     if data['ref_type']:
         tag_name = data['ref']
         repo_name = data['repository']['full_name']
-        release_process.finish_release(tag_name, REPOS[repo_name],
-                                       CONFIG, META_REPO)
+        if repo_name in REPOS:
+            release_process.finish_release(tag_name, REPOS[repo_name],
+                                           CONFIG, META_REPO)
+        else:
+            LOG.warn('Recieved webhook event for %s, but this is not a '
+                     'configured repository.' % repo_name)
 
 
 @WEBHOOK.hook(event_type='pull_request')
 def on_pull_event(data):
-    pass
+    global META_REPO
+    if data['action'] == 'closed':
+        if data['pull_request']['repo']['full_name'] == META_REPO.repo_name:
+            if data['pull_request']['title'] == 'Bump Meta':
+                # Delete github branhc:
+                META_REPO.get_git_ref("heads/source" 'bump_meta').delete()
+                # Delete local branch
+                git.checkout_master(META_REPO)
+                git.delete_local_branch('bump_meta')
 
 
 @WEBHOOK.hook(event_type='pull_request_review')

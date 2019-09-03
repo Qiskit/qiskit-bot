@@ -13,6 +13,7 @@
 # that they have been altered from the originals.
 
 import logging
+import os
 import re
 import subprocess
 import textwrap
@@ -35,7 +36,54 @@ def _run_reno(local_path, version_number):
 
 
 def bump_meta(meta_repo, repo, version_number, conf, reno=None):
-    pass
+
+    version_number_pieces = version_number.split('.')
+    meta_version = git.get_latest_tag(repo)
+    meta_version_pieces = meta_version.split('.')
+    if version_number_pieces[2] == 0:
+        new_meta_version = '%s.%s.%s' % (meta_version_pieces[0],
+                                         meta_version_pieces[1] + 1, 0)
+    else:
+        new_meta_version = '%s.%s.%s' % (meta_version_pieces[0],
+                                         meta_version_pieces[1],
+                                         meta_version_pieces[2] + 1)
+    package_name = repo.repo_name.split('/')[1]
+    pulls = meta_repo.gh_repo.get_pulls(state='open')
+    setup_py_path = os.path.join(repo.local_path, 'setup.py')
+    title = 'Bump Meta'
+    requirements_str = package_name + '==' + version_number
+    bump_pr = None
+    for pull in pulls:
+        if pull.title == title:
+            bump_pr = pull
+
+            break
+    else:
+        git.create_branch('bump_meta', 'origin/master', meta_repo)
+
+    git.checkout_ref('bump_meta')
+    with open(setup_py_path, 'w') as fd:
+        for line in fd:
+            if package_name in line:
+                old_version = re.match(package_name + '==(.*)\n', line)[1]
+                line.replace(package_name + '==' + old_version,
+                             requirements_str)
+            elif 'version=' in line:
+                old_version = re.match('version=(.*)', line)[1]
+                if old_version != new_meta_version:
+                    line.replace('version=%s' % old_version,
+                                 'version=%s' % new_meta_version)
+    body = """
+Bump the meta repo version to include:
+
+%s
+
+""" % requirements_str
+    git.create_git_commit_for_all(
+        meta_repo, 'Bump version for %s' % requirements_str)
+    if not bump_pr:
+        meta_repo.gh_repo.create_pull(title, base='master', head='bump_meta',
+                                      body=body)
 
 
 def _generate_changelog(repo, log_string, categories):
@@ -91,7 +139,7 @@ def finish_release(version_number, repo, conf, meta_repo):
         repo_branches = [x.name for x in repo.gh_repo.get_branches()]
         if version_number_pieces[2] == 0 and \
                 branch_name not in repo_branches:
-            git.create_branch(branch_name, version_number, repo)
+            git.create_branch(branch_name, version_number, repo, push=True)
     # If a patch release log between 0.A.X..0.A.X-1
     if version_number_pieces[2] > 0:
         log_string = '%s...%s' % (
@@ -108,3 +156,4 @@ def finish_release(version_number, repo, conf, meta_repo):
     create_github_release(repo, log_string, version_number,
                           repo_config['changelog_categories'])
     bump_meta(meta_repo, repo, version_number, conf, reno_notes)
+    git.checkout_master(repo, pull=True)

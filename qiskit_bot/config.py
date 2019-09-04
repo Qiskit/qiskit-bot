@@ -35,6 +35,7 @@ schema = vol.Schema({
     'api_key': str,
     'working_dir': str,
     'meta_repo': vol.Optional(str, default='Qiskit/qiskit'),
+    'github_webhook_secret': vol.Optional(str),
     'repos': [{
         'name': str,
         'reno': vol.Optional(bool, default=False),

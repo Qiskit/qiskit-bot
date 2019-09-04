@@ -50,6 +50,7 @@ def setup():
     """Setup config."""
     global CONFIG
     global META_REPO
+    global WEBHOOK
     if not CONFIG:
         CONFIG = config.load_config('/etc/qiskit_bot.yaml')
     if not os.path.isdir(CONFIG['working_dir']):
@@ -61,6 +62,14 @@ def setup():
                                          CONFIG['api_key'], repo_config=repo)
     META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
                            CONFIG['api_key'])
+    # NOTE(mtreinish): This is a workaround until there is a supported method
+    # to set a secret post-init. See:
+    # https://github.com/bloomberg/python-github-webhook/pull/19
+    if CONFIG.get('github_webhook_secret', None):
+        secret = CONFIG['github_webhook_secret']
+        if not isinstance(secret, bytes):
+            secret = secret.encode("utf-8")
+        WEBHOOK._secret = secret
 
 
 @APP.route("/", methods=['GET'])

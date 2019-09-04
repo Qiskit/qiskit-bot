@@ -34,6 +34,19 @@ def push_ref_to_github(repo, ref):
         return False
 
 
+def pull_remote_ref_to_local(repo, ref):
+    cmd = ['git', 'pull', 'origin', ref]
+    LOG.info('Pulling remote ref %s to local branch' %
+             ref)
+    try:
+        subprocess.run(cmd, capture_output=True, check=True,
+                       cwd=repo.local_path)
+    except subprocess.CalledProcessError:
+        LOG.exception('git pull failed')
+        return False
+    return True
+
+
 def create_branch(branch_name, sha1, repo, push=False):
     """Create a branch and push it to github."""
 

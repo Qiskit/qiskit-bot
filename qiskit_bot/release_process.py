@@ -58,7 +58,8 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
     for pull in pulls:
         if pull.title == title:
             bump_pr = pull
-
+            git.checkout_ref(meta_repo, 'bump_meta')
+            git.pull_remote_ref_to_local(meta_repo, 'bump_meta')
             break
     else:
         git.create_branch('bump_meta', 'origin/master', meta_repo)

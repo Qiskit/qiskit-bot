@@ -24,7 +24,7 @@ def push_ref_to_github(repo, ref):
     try:
         LOG.info('Pushing ref %s for %s to github' % (ref,
                                                       repo.local_path))
-        res = subprocess.run(['git', 'push', ref, repo.ssh_remote],
+        res = subprocess.run(['git', 'push', repo.ssh_remote, ref],
                              capture_output=True, check=True,
                              cwd=repo.local_path)
         LOG.debug('Branch ref %s for %s, stdout:\n%s\nstderr:\n%s' % (
@@ -89,11 +89,11 @@ def checkout_ref(repo, ref):
 
 
 def create_git_commit_for_all(repo, commit_msg):
-    cmd = ['git', 'commit', '-a', '-F', '.']
+    cmd = ['git', 'commit', '-a', '-m', commit_msg]
     LOG.info('Creating git commit for all local changes in %s' %
              repo.local_path)
     try:
-        subprocess.run(cmd, input=commit_msg, capture_output=True, check=True,
+        subprocess.run(cmd, capture_output=True, check=True,
                        cwd=repo.local_path)
     except subprocess.CalledProcessError:
         LOG.exception('git commit failed')

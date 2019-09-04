@@ -123,16 +123,17 @@ def on_pull_event(data):
     global META_REPO
     global CONFIG
     if data['action'] == 'closed':
-        if data['pull_request']['repo']['full_name'] == META_REPO.repo_name:
+        if data['repository']['full_name'] == META_REPO.repo_name:
             if data['pull_request']['title'] == 'Bump Meta':
                 with fasteners.InterProcessLock(
-                    os.path.join(os.path.join(CONFIG.working_dir, 'lock'),
+                    os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
                                  META_REPO.name)):
                     # Delete github branhc:
-                    META_REPO.get_git_ref("heads/source" 'bump_meta').delete()
+                    META_REPO.gh_repo.get_git_ref(
+                        "heads/" 'bump_meta').delete()
                     # Delete local branch
                     git.checkout_master(META_REPO)
-                    git.delete_local_branch('bump_meta')
+                    git.delete_local_branch('bump_meta', META_REPO)
 
 
 @WEBHOOK.hook(event_type='pull_request_review')

@@ -106,7 +106,8 @@ Bump the meta repo version to include:
                                       body=body)
     else:
         old_body = bump_pr.body
-        bump_pr.edit(old_body + '\n' + requirements_str)
+        new_body = old_body + '\n' + requirements_str
+        bump_pr.edit(body=new_body)
 
 
 def _generate_changelog(repo, log_string, categories):

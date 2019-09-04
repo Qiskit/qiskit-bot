@@ -96,12 +96,6 @@ def on_push(data):
     LOG.debug('Received push event for repo: %s sha1: %s' % (
         data['repository']['full_name'], data['after']))
     global REPOS
-    print(type(data))
-    import pprint
-    pprint.pprint(data)
-#    data = json.loads(body)
-#    repo_name = data['repository']['full_name']
-#    git_url = data['repository']['git_url']
 
 
 @WEBHOOK.hook(event_type='create')

@@ -54,6 +54,9 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
     setup_py_path = os.path.join(meta_repo.local_path, 'setup.py')
     title = 'Bump Meta'
     requirements_str = package_name + '==' + version_number
+    LOG.info("Processing meta repo bump for %s" % (new_meta_version,
+                                                   requirements_str)
+
     bump_pr = None
     for pull in pulls:
         if pull.title == title:
@@ -78,11 +81,18 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
             elif 'version=' in line:
                 old_version = re.search('version=(.*)', line)[1]
                 old_version = old_version.strip('",')
-                if old_version != new_meta_version:
+                old_version_pieces = old_version.split('.')
+                new_version_pieces = new_meta_version.split('.')
+                if old_version != new_meta_version and \
+                        old_version_pieces[1] <= new_version_pieces[1]:
+                    LOG.debug('Bumping meta version %s to %s' % (
+                              old_version, new_meta_version))
                     out_line = line.replace('version="%s"' % old_version,
                                             'version="%s"' % new_meta_version)
                     buf.write(out_line)
                 else:
+                    LOG.debug('Not bumping meta version %s it is the same or '
+                              'less than %s' % (old_version, new_meta_version))
                     buf.write(line)
             else:
                 buf.write(line)

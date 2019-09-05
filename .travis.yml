@@ -13,7 +13,6 @@ matrix:
       sudo: true
     - python: "3.6"
       env: TOXENV=lint
-    - python: "3.6"
 cache:
   directories:
     - $HOME/.cache/pip

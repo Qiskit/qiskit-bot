@@ -54,8 +54,7 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
     setup_py_path = os.path.join(meta_repo.local_path, 'setup.py')
     title = 'Bump Meta'
     requirements_str = package_name + '==' + version_number
-    LOG.info("Processing meta repo bump for %s" % (new_meta_version,
-                                                   requirements_str)
+    LOG.info("Processing meta repo bump for %s" % requirements_str)
 
     bump_pr = None
     for pull in pulls:

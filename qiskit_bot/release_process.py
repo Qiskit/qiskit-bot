@@ -52,6 +52,8 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
     package_name = repo.repo_name.split('/')[1]
     pulls = meta_repo.gh_repo.get_pulls(state='open')
     setup_py_path = os.path.join(meta_repo.local_path, 'setup.py')
+    docs_conf_path = os.path.join(
+        os.path.join(meta_repo.local_path, 'docs'), 'conf.py')
     title = 'Bump Meta'
     requirements_str = package_name + '==' + version_number
     LOG.info("Processing meta repo bump for %s" % requirements_str)
@@ -67,7 +69,7 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
         git.create_branch('bump_meta', 'origin/master', meta_repo)
 
     git.checkout_ref(meta_repo, 'bump_meta')
-
+    # Update setup.py
     buf = io.StringIO()
     with open(setup_py_path, 'r') as fd:
         for line in fd:
@@ -98,6 +100,26 @@ def bump_meta(meta_repo, repo, version_number, conf, reno=None):
 
     buf.seek(0)
     with open(setup_py_path, 'w') as fd:
+        shutil.copyfileobj(buf, fd)
+    # Update docs/conf.py
+    buf = io.StringIO()
+    with open(docs_conf_path, 'r') as fd:
+        for line in fd:
+            if line.startswith('release = '):
+                old_version = re.search("release = '(.*)'", line)[1]
+                old_version = old_version.strip('",')
+                old_version_pieces = old_version.split('.')
+                new_version_pieces = new_meta_version.split('.')
+                if old_version != new_meta_version and \
+                        old_version_pieces[1] <= new_version_pieces[1]:
+                    out_line = line.replace(old_version, new_meta_version)
+                    buf.write(out_line)
+                else:
+                    buf.write(line)
+            else:
+                buf.write(line)
+    buf.seek(0)
+    with open(docs_conf_path, 'w') as fd:
         shutil.copyfileobj(buf, fd)
 
     body = """

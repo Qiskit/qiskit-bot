@@ -58,10 +58,20 @@ def setup():
     if not os.path.isdir(os.path.join(CONFIG['working_dir'], 'lock')):
         os.mkdir(os.path.join(CONFIG['working_dir'], 'lock'))
     for repo in CONFIG['repos']:
-        REPOS[repo['name']] = repos.Repo(CONFIG['working_dir'], repo['name'],
-                                         CONFIG['api_key'], repo_config=repo)
-    META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
-                           CONFIG['api_key'])
+
+        with fasteners.InterProcessLock(
+                os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
+                             repo.name)):
+            REPOS[repo['name']] = repos.Repo(CONFIG['working_dir'],
+                                             repo['name'],
+                                             CONFIG['api_key'],
+                                             repo_config=repo)
+    # Load the meta repo
+    with fasteners.InterProcessLock(
+            os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
+                         META_REPO.name)):
+        META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
+                               CONFIG['api_key'])
     # NOTE(mtreinish): This is a workaround until there is a supported method
     # to set a secret post-init. See:
     # https://github.com/bloomberg/python-github-webhook/pull/19

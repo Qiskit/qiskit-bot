@@ -13,9 +13,9 @@
 # that they have been altered from the originals.
 
 import logging
+import os
 
 import voluptuous as vol
-
 import yaml
 
 
@@ -23,11 +23,11 @@ LOG = logging.getLogger(__name__)
 
 
 default_changelog_categories = {
-    'Deprecation': 'Deprecated',
-    'New Feature': 'Added',
-    'API Change': 'Changed',
-    'Removal': 'Removed',
-    'Bugfix': 'Fixed',
+    'Changelog: Deprecation': 'Deprecated',
+    'Changelog: New Feature': 'Added',
+    'Changelog: API Change': 'Changed',
+    'Changelog: Removal': 'Removed',
+    'Changelog: Bugfix': 'Fixed',
 }
 
 
@@ -38,10 +38,7 @@ schema = vol.Schema({
     'github_webhook_secret': vol.Optional(str),
     'repos': [{
         'name': str,
-        'reno': vol.Optional(bool, default=False),
         'branch_on_release': vol.Optional(bool, default=False),
-        'changelog_categories': vol.Optional(
-            {}, default=default_changelog_categories)
     }],
 })
 
@@ -54,4 +51,25 @@ def load_config(path):
         [x['name'] for x in raw_config['repos']]))
     if 'meta_repo' in raw_config:
         LOG.info('meta_repo: %s' % raw_config['meta_repo'])
+    return raw_config
+
+
+local_config_schema = vol.Schema({
+    'users': [{}],
+    'categories': vol.Optional({}),
+})
+
+
+def load_repo_config(repo):
+    config_path = os.path.join(repo.local_path, 'qiskit_bot.yaml')
+    if not os.path.isfile(config_path):
+        return {'users': [], 'categories': default_changelog_categories}
+    with open(config_path, 'r') as fd:
+        raw_config = yaml.safe_load(fd.read())
+    try:
+        local_config_schema(raw_config)
+    except vol.MultipleInvalid:
+        LOG.exception('Invalid local repo config for %s' % repo.repo_name)
+        return None
+    LOG.info('Loaded local repo config for %s' % repo.repo_name)
     return raw_config

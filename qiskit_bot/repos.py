@@ -16,6 +16,8 @@ import subprocess
 
 from github import Github
 
+from qiskit_bot import config
+
 LOG = logging.getLogger(__name__)
 
 
@@ -34,6 +36,7 @@ class Repo(object):
             LOG.info('Local repo clone at %s already exists, not creating' %
                      self.local_path)
         self.ssh_remote = 'github'
+        self.local_config = self.get_local_config()
 
     def _get_name(self):
         repo = self.repo_name.split('/')[1]
@@ -73,3 +76,6 @@ class Repo(object):
         gh_session = Github(access_token)
         repo = gh_session.get_repo(self.repo_name)
         return repo
+
+    def get_local_config(self):
+        return config.load_repo_config(self)

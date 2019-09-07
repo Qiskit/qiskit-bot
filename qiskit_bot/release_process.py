@@ -191,6 +191,8 @@ def finish_release(version_number, repo, conf, meta_repo):
     branch_number = '.'.join(version_number_pieces[:2])
     reno_notes = None
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
+        # Pull latest master
+        git.checkout_master(repo, pull=True)
         if repo_config.get('reno'):
             reno_notes = _run_reno(repo.local_path, version_number)
         if repo_config.get('branch_on_release'):
@@ -219,10 +221,10 @@ def finish_release(version_number, repo, conf, meta_repo):
                 version_number,
                 old_version_string)
 
+        categories = repo.get_local_config().get(
+            'categories', config.default_changelog_categories)
         create_github_release(repo, log_string, version_number,
-                              repo_config.get(
-                                  'changelog_categories',
-                                  config.default_changelog_categories))
+                              categories)
         git.checkout_master(repo, pull=True)
 
     with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):

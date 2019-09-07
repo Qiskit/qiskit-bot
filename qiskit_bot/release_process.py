@@ -17,7 +17,6 @@ import logging
 import os
 import re
 import shutil
-import subprocess
 
 import fasteners
 
@@ -27,17 +26,7 @@ from qiskit_bot import git
 LOG = logging.getLogger(__name__)
 
 
-def _run_reno(local_path, version_number):
-    try:
-        res = subprocess.run(['reno', 'report', '--version', version_number],
-                             cwd=local_path, capture_output=True, check=True)
-        return res.stdout
-    except subprocess.CalledProcessError:
-        LOG.exception('reno report failed')
-        return None
-
-
-def bump_meta(meta_repo, repo, version_number, conf, reno=None):
+def bump_meta(meta_repo, repo, version_number, conf):
     git.checkout_master(meta_repo, pull=True)
     version_number_pieces = version_number.split('.')
     meta_version = git.get_latest_tag(meta_repo).decode('utf8')
@@ -186,15 +175,11 @@ def finish_release(version_number, repo, conf, meta_repo):
     working_dir = conf.get('working_dir')
     lock_dir = os.path.join(working_dir, 'lock')
     repo_config = repo.repo_config
-    reno_notes = None
     version_number_pieces = version_number.split('.')
     branch_number = '.'.join(version_number_pieces[:2])
-    reno_notes = None
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
         # Pull latest master
         git.checkout_master(repo, pull=True)
-        if repo_config.get('reno'):
-            reno_notes = _run_reno(repo.local_path, version_number)
         if repo_config.get('branch_on_release'):
             branch_name = 'stable/%s' % branch_number
             repo_branches = [x.name for x in repo.gh_repo.get_branches()]
@@ -228,5 +213,5 @@ def finish_release(version_number, repo, conf, meta_repo):
         git.checkout_master(repo, pull=True)
 
     with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):
-        bump_meta(meta_repo, repo, version_number, conf, reno_notes)
+        bump_meta(meta_repo, repo, version_number, conf)
         git.checkout_master(meta_repo, pull=True)

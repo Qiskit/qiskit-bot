@@ -26,7 +26,7 @@ from qiskit_bot import git
 LOG = logging.getLogger(__name__)
 
 
-def bump_meta(meta_repo, repo, version_number, conf):
+def bump_meta(meta_repo, repo, version_number):
     git.checkout_master(meta_repo, pull=True)
     version_number_pieces = version_number.split('.')
     meta_version = git.get_latest_tag(meta_repo).decode('utf8')
@@ -111,8 +111,7 @@ def bump_meta(meta_repo, repo, version_number, conf):
     with open(docs_conf_path, 'w') as fd:
         shutil.copyfileobj(buf, fd)
 
-    body = """
-Bump the meta repo version to include:
+    body = """Bump the meta repo version to include:
 
 %s
 
@@ -213,5 +212,5 @@ def finish_release(version_number, repo, conf, meta_repo):
         git.checkout_master(repo, pull=True)
 
     with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):
-        bump_meta(meta_repo, repo, version_number, conf)
+        bump_meta(meta_repo, repo, version_number)
         git.checkout_master(meta_repo, pull=True)

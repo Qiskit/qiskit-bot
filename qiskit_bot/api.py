@@ -13,6 +13,7 @@
 """API server for listening to events from github."""
 
 import logging
+import multiprocessing
 import os
 import sys
 from urllib import parse
@@ -23,6 +24,7 @@ import github_webhook
 
 from qiskit_bot import config
 from qiskit_bot import git
+from qiskit_bot import pull_requests
 from qiskit_bot import release_process
 from qiskit_bot import repos
 
@@ -35,6 +37,8 @@ WEBHOOK = github_webhook.Webhook(APP)
 REPOS = {}
 META_REPO = None
 CONFIG = None
+
+APPROVED_QUEUE = multiprocessing.Queue()
 
 
 @APP.before_first_request
@@ -126,6 +130,13 @@ def on_create(data):
 def on_pull_event(data):
     global META_REPO
     global CONFIG
+
+    repo_name = data['repository']['full_name']
+    if repo_name not in REPOS and repo_name != META_REPO.repo_name:
+        LOG.warn("Received a webhook event for %s, but this is not a "
+                 "configured repository." % repo_name)
+        return 
+
     if data['action'] == 'closed':
         if data['repository']['full_name'] == META_REPO.repo_name:
             if data['pull_request']['title'] == 'Bump Meta':
@@ -139,9 +150,18 @@ def on_pull_event(data):
                     git.checkout_master(META_REPO)
                     git.delete_local_branch('bump_meta', META_REPO)
 
+    elif data['action'] in ['opened', 'assigned', 'unassigned',
+                          'review_requested', 'review_request_removed',
+                          'labeled', 'unlabeled', 'edited', 'ready_for_review',
+                          'unlocked']:
+        if not CONFIG[repo_repo_name].get('auto_merge'):
+            return
+        if pull_requests.check_preconditions(data['number'], repo):
+            APPROVED_QUEUE.put((data['number'], repo))
+
 
 @WEBHOOK.hook(event_type='pull_request_review')
-def on_pull_request_review(data):
+def on_pull_review(data):
     pass
 
 

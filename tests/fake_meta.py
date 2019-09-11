@@ -348,4 +348,4 @@ def setup(app):
 
         with open(os.path.join(self.tempdir.path,
                                'docs', 'conf.py'), 'w') as fd:
-                fd.write(docs_conf_str)
+            fd.write(docs_conf_str)

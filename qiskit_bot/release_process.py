@@ -56,8 +56,7 @@ def bump_meta(meta_repo, repo, version_number):
             break
     else:
         git.create_branch('bump_meta', 'origin/master', meta_repo)
-
-    git.checkout_ref(meta_repo, 'bump_meta')
+        git.checkout_ref(meta_repo, 'bump_meta')
     # Update setup.py
     buf = io.StringIO()
     with open(setup_py_path, 'r') as fd:

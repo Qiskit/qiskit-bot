@@ -32,26 +32,27 @@ default_changelog_categories = {
 
 
 schema = vol.Schema({
-    'api_key': str,
-    'working_dir': str,
-    'meta_repo': vol.Optional(str, default='Qiskit/qiskit'),
-    'github_webhook_secret': vol.Optional(str),
-    'repos': [{
-        'name': str,
-        'branch_on_release': vol.Optional(bool, default=False),
-    }],
+    vol.Required('api_key'): str,
+    vol.Required('working_dir'): str,
+    vol.Optional('meta_repo', default='Qiskit/qiskit'): str,
+    vol.Optional('github_webhook_secret'): str,
+    vol.Required('repos'): vol.All([{
+        vol.Required('name'): str,
+        vol.Optional('branch_on_release', default=False): bool,
+    }]),
 })
 
 
 def load_config(path):
     with open(path, 'r') as fd:
         raw_config = yaml.safe_load(fd.read())
-    schema(raw_config)
-    LOG.info('Loaded config\nRepos: %s' % ','.join(
-        [x['name'] for x in raw_config['repos']]))
-    if 'meta_repo' in raw_config:
-        LOG.info('meta_repo: %s' % raw_config['meta_repo'])
-    return raw_config
+    config = schema(raw_config)
+    if 'repos' in config:
+        LOG.info('Loaded config\nRepos: %s' % ','.join(
+            [x['name'] for x in raw_config['repos']]))
+    if 'meta_repo' in config:
+        LOG.info('meta_repo: %s' % config['meta_repo'])
+    return config
 
 
 local_config_schema = vol.Schema({

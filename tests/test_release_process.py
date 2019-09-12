@@ -69,6 +69,14 @@ qiskit-terra==0.16.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
+
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.16.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -121,6 +129,13 @@ qiskit-terra==0.16.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.16.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -177,6 +192,14 @@ qiskit-terra==0.16.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.1')
@@ -223,6 +246,14 @@ qiskit-terra==0.9.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.9.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -276,6 +307,14 @@ qiskit-terra==0.9.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.9.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -332,6 +371,14 @@ qiskit-terra==0.16.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.1')
@@ -387,6 +434,15 @@ qiskit-terra==0.16.1
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
+
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.1')
@@ -432,6 +488,14 @@ qiskit-terra==0.17.0
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.21.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.17.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -484,6 +548,15 @@ qiskit-terra==0.17.0
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.21.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
+
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.17.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -540,6 +613,14 @@ qiskit-terra==0.17.0
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.17.0')
@@ -586,6 +667,14 @@ qiskit-terra==0.10.0
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.10.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
@@ -639,6 +728,14 @@ qiskit-terra==0.10.0
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         body = ("Bump the meta repo version to include:\n\n"
                 "qiskit-terra==0.10.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(

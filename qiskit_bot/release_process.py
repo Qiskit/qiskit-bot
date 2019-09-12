@@ -168,6 +168,29 @@ def create_github_release(repo, log_string, version_number, categories):
     repo.gh_repo.create_git_release(version_number, release_name, changelog)
 
 
+def _get_log_string(version_number_pieces):
+    version_number = '.'.join(version_number_pieces)
+    # If a patch release log between 0.A.X..0.A.X-1
+    if int(version_number_pieces[2]) > 0:
+        old_version_string = '%s.%s.%s' % (
+            version_number_pieces[0],
+            version_number_pieces[1],
+            int(version_number_pieces[2]) - 1)
+        log_string = '%s...%s' % (
+            version_number,
+            old_version_string)
+    # If a minor release log between 0.X.0..0.X-1.0
+    else:
+        old_version_string = '%s.%s.%s' % (
+            version_number_pieces[0],
+            int(version_number_pieces[1]) - 1,
+            0)
+        log_string = '%s...%s' % (
+            version_number,
+            old_version_string)
+    return log_string
+
+
 def finish_release(version_number, repo, conf, meta_repo):
     """Do the post tag release processes."""
     working_dir = conf.get('working_dir')
@@ -185,25 +208,8 @@ def finish_release(version_number, repo, conf, meta_repo):
                     branch_name not in repo_branches:
                 git.checkout_master(repo, pull=True)
                 git.create_branch(branch_name, version_number, repo, push=True)
-        # If a patch release log between 0.A.X..0.A.X-1
-        if int(version_number_pieces[2]) > 0:
-            old_version_string = '%s.%s.%s' % (
-                version_number_pieces[0],
-                version_number_pieces[1],
-                int(version_number_pieces[2]) - 1)
-            log_string = '%s...%s' % (
-                version_number,
-                old_version_string)
-        # If a minor release log between 0.X.0..0.X-1.0
-        else:
-            old_version_string = '%s.%s.%s' % (
-                version_number_pieces[0],
-                int(version_number_pieces[1]) - 1,
-                0)
-            log_string = '%s...%s' % (
-                version_number,
-                old_version_string)
 
+        log_string = _get_log_string(version_number_pieces)
         categories = repo.get_local_config().get(
             'categories', config.default_changelog_categories)
         create_github_release(repo, log_string, version_number,

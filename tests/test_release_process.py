@@ -792,6 +792,28 @@ qiskit-terra==0.16.0
                     continue
             self.assertTrue(terra_bump)
             self.assertTrue(meta_bump)
+        with open(os.path.join(self.temp_dir.path, 'docs', 'conf.py'),
+                  'r') as fd:
+            for line in fd:
+                if 'release = ' in line:
+                    self.assertEqual(line.strip(), "release = '0.21.0'")
+                    break
+            else:
+                self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.0')
+
+    def test_get_log_string(self):
+        version_pieces = ['0', '10', '2']
+        self.assertEqual('0.10.2...0.10.1',
+                         release_process._get_log_string(version_pieces))
+        version_pieces = ['0', '3', '0']
+        self.assertEqual('0.3.0...0.2.0',
+                         release_process._get_log_string(version_pieces))
+        version_pieces = ['0', '3', '25']
+        self.assertEqual('0.3.25...0.3.24',
+                         release_process._get_log_string(version_pieces))
+        version_pieces = ['0', '25', '0']
+        self.assertEqual('0.25.0...0.24.0',
+                         release_process._get_log_string(version_pieces))

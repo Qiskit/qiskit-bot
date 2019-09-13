@@ -61,7 +61,7 @@ def setup():
 
         with fasteners.InterProcessLock(
                 os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
-                             repo.name)):
+                             repo['name'])):
             REPOS[repo['name']] = repos.Repo(CONFIG['working_dir'],
                                              repo['name'],
                                              CONFIG['api_key'],

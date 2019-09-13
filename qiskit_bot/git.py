@@ -29,8 +29,10 @@ def push_ref_to_github(repo, ref):
                              cwd=repo.local_path)
         LOG.debug('Branch ref %s for %s, stdout:\n%s\nstderr:\n%s' % (
             ref, repo.local_path, res.stdout, res.stderr))
-    except subprocess.CalledProcessError:
-        LOG.exception('Failed to push branch to github')
+    except subprocess.CalledProcessError as e:
+        LOG.exception(
+            'Failed to push branch to github\nstdout:\n%s\nstderr:\n%s'
+            % (e.stdout, e.stderr))
         return False
 
 
@@ -41,8 +43,10 @@ def pull_remote_ref_to_local(repo, ref):
     try:
         subprocess.run(cmd, capture_output=True, check=True,
                        cwd=repo.local_path)
-    except subprocess.CalledProcessError:
-        LOG.exception('git pull failed')
+    except subprocess.CalledProcessError as e:
+        LOG.exception('git pull failed\nstdout:\n%s\nstderr:\n%s'
+                      % (e.stdout, e.stderr))
+
         return False
     return True
 
@@ -57,8 +61,10 @@ def create_branch(branch_name, sha1, repo, push=False):
                              cwd=repo.local_path)
         LOG.debug('Branch create %s for %s, stdout:\n%s\nstderr:\n%s' % (
             branch_name, repo.local_path, res.stdout, res.stderr))
-    except subprocess.CalledProcessError:
-        LOG.exception('Failed to create a local branch')
+    except subprocess.CalledProcessError as e:
+        LOG.exception(
+            'Failed to create a local branch\nstdout:\n%s\nstderr:\n%s'
+            % (e.stdout, e.stderr))
         return False
     if not push:
         return True
@@ -72,8 +78,9 @@ def get_git_log(repo, sha1):
                              capture_output=True, check=True,
                              cwd=repo.local_path)
         return res.stdout
-    except subprocess.CalledProcessError:
-        LOG.exception('Failed to get git log')
+    except subprocess.CalledProcessError as e:
+        LOG.exception('Failed to get git log\nstdout:\n%s\nstderr:\n%s'
+                      % (e.stdout, e.stderr))
         return ''
 
 
@@ -82,8 +89,9 @@ def clean_repo(repo):
     try:
         subprocess.run(cmd, capture_output=True, check=True,
                        cwd=repo.local_path)
-    except subprocess.CompletedProcess:
-        LOG.exception('')
+    except subprocess.CompletedProcess as e:
+        LOG.exception('git clean failed\nstdout:\n%s\nstderr:\n%s'
+                      % (e.stdout, e.stderr))
         return False
     return True
 
@@ -96,8 +104,9 @@ def checkout_ref(repo, ref):
                              cwd=repo.local_path)
         LOG.debug('Git checkout for %s, stdout:\n%s\nstderr:\n%s' % (
             repo.local_path, res.stdout, res.stderr))
-    except subprocess.CompletedProcess:
-        LOG.exception('Git checkout failed')
+    except subprocess.CompletedProcess as e:
+        LOG.exception('Git checkout failed\nstdout:\n%s\nstderr:\n%s'
+                      % (e.stdout, e.stderr))
         return False
 
 
@@ -108,8 +117,9 @@ def create_git_commit_for_all(repo, commit_msg):
     try:
         subprocess.run(cmd, capture_output=True, check=True,
                        cwd=repo.local_path)
-    except subprocess.CalledProcessError:
-        LOG.exception('git commit failed')
+    except subprocess.CalledProcessError as e:
+        LOG.exception('git commit failed\nstdout:\n%s\nstderr:\n%s'
+                      % (e.stdout, e.stderr))
         return False
     return True
 
@@ -122,8 +132,9 @@ def checkout_master(repo, pull=True):
                              cwd=repo.local_path)
         LOG.debug('Git master checkout for %s, stdout:\n%s\nstderr:\n%s' % (
             repo.local_path, res.stdout, res.stderr))
-    except subprocess.CompletedProcess:
-        LOG.exception('Git master checkout failed')
+    except subprocess.CompletedProcess as e:
+        LOG.exception('Git master checkout failed\nstdout:\n%s\nstderr:\n%s\n'
+                      % (e.stdout, e.stderr))
         return False
     if not pull:
         return True
@@ -132,8 +143,9 @@ def checkout_master(repo, pull=True):
     try:
         subprocess.run(cmd, capture_output=True, check=True,
                        cwd=repo.local_path)
-    except subprocess.CompletedProcess:
-        LOG.exception('Git pull master failed')
+    except subprocess.CompletedProcess as e:
+        LOG.exception('Git pull master failed\nstdout:\n%s\nstderr:\n%s\n'
+                      % (e.stdout, e.stderr))
         return False
 
 
@@ -143,8 +155,9 @@ def get_latest_tag(repo):
     try:
         res = subprocess.run(cmd, capture_output=True, check=True,
                              cwd=repo.local_path)
-    except subprocess.CompletedProcess:
-        LOG.exception('Git pull master failed')
+    except subprocess.CompletedProcess as e:
+        LOG.exception('Git pull master failed\nstdout:\n%s\nstderr:\n%s\n'
+                      % (e.stdout, e.stderr))
         raise
     return res.stdout
 
@@ -159,7 +172,9 @@ def delete_local_branch(branch_name, repo):
                              cwd=repo.local_path)
         LOG.debug('Branch delete %s for %s, stdout:\n%s\nstderr:\n%s' % (
             branch_name, repo.local_path, res.stdout, res.stderr))
-    except subprocess.CalledProcessError:
-        LOG.exception('Failed to delete a local branch')
+    except subprocess.CalledProcessError as e:
+        LOG.exception(
+            'Failed to delete a local branch\nstdout:\n%s\nstderr:\n%s\n'
+            % (e.stdout, e.stderr))
         return False
     return True

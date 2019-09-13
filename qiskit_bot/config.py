@@ -36,6 +36,8 @@ schema = vol.Schema({
     vol.Required('working_dir'): str,
     vol.Optional('meta_repo', default='Qiskit/qiskit'): str,
     vol.Optional('github_webhook_secret'): str,
+    vol.Optional('log_level', default='INFO'): str,
+    vol.Optional('log_format'): str,
     vol.Required('repos'): vol.All([{
         vol.Required('name'): str,
         vol.Optional('branch_on_release', default=False): bool,

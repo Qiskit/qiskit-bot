@@ -53,6 +53,12 @@ def setup():
     global WEBHOOK
     if not CONFIG:
         CONFIG = config.load_config('/etc/qiskit_bot.yaml')
+    log_level = CONFIG.get('log_level', 'INFO')
+    default_log_format = ('%(asctime)s.%(msecs)d: %(process)d %(levelname)s '
+                          '%(name)s [-] %(message)s')
+    log_format = CONFIG.get('log_format', default_log_format)
+
+    logging.basicConfig(level=log_level, format=log_format)
     if not os.path.isdir(CONFIG['working_dir']):
         os.mkdir(CONFIG['working_dir'])
     if not os.path.isdir(os.path.join(CONFIG['working_dir'], 'lock')):

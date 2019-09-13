@@ -69,7 +69,7 @@ def setup():
     # Load the meta repo
     with fasteners.InterProcessLock(
             os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
-                         META_REPO.name)):
+                         CONFIG['meta_repo'])):
         META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
                                CONFIG['api_key'])
     # NOTE(mtreinish): This is a workaround until there is a supported method

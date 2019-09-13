@@ -34,7 +34,7 @@ default_changelog_categories = {
 schema = vol.Schema({
     vol.Required('api_key'): str,
     vol.Required('working_dir'): str,
-    vol.Optional('meta_repo', default='Qiskit/qiskit'): str,
+    vol.Required('meta_repo'): str,
     vol.Optional('github_webhook_secret'): str,
     vol.Optional('log_level', default='INFO'): str,
     vol.Optional('log_format'): str,

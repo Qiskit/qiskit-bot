@@ -27,6 +27,12 @@ class TestReleaseProcess(fixtures.TestWithFixtures, unittest.TestCase):
     def setUp(self):
         self.temp_dir = fixtures.TempDir()
         self.useFixture(self.temp_dir)
+        self.generate = unittest.mock.patch.object(
+            release_process, '_regenerate_authors')
+        self.generate_mock = self.generate.start()
+
+    def tearDown(self):
+        self.generate.stop()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_minor_no_pulls(self, git_mock):
@@ -81,6 +87,7 @@ qiskit-terra==0.16.1
                 "qiskit-terra==0.16.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_minor_with_unrelated_pulls(self,
@@ -140,6 +147,7 @@ qiskit-terra==0.16.1
                 "qiskit-terra==0.16.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_minor_with_existing_pulls(self,
@@ -203,6 +211,7 @@ qiskit-terra==0.16.1
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.1')
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_patch_with_no_pulls(self,
@@ -258,6 +267,7 @@ qiskit-terra==0.9.1
                 "qiskit-terra==0.9.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_patch_with_unrelated_pulls(self,
@@ -319,6 +329,7 @@ qiskit-terra==0.9.1
                 "qiskit-terra==0.9.1\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_pending_patch_release_pr(self,
@@ -382,6 +393,7 @@ qiskit-terra==0.16.1
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.1')
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_pending_minor_release_pr(self,
@@ -446,6 +458,7 @@ qiskit-terra==0.16.1
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.1')
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_minor_no_pulls(self, git_mock):
@@ -500,6 +513,7 @@ qiskit-terra==0.17.0
                 "qiskit-terra==0.17.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_minor_with_unrelated_pulls(self,
@@ -561,6 +575,7 @@ qiskit-terra==0.17.0
                 "qiskit-terra==0.17.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_minor_with_existing_pulls(self,
@@ -624,6 +639,7 @@ qiskit-terra==0.17.0
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.17.0')
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_patch_with_no_pulls(self,
@@ -679,6 +695,7 @@ qiskit-terra==0.10.0
                 "qiskit-terra==0.10.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_patch_with_unrelated_pulls(self,
@@ -740,6 +757,7 @@ qiskit-terra==0.10.0
                 "qiskit-terra==0.10.0\n\n")
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='master', head='bump_meta', body=body)
+        self.generate_mock.called_once_with(meta_repo)
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_minor_release_from_pending_patch_release_pr(self,
@@ -803,6 +821,7 @@ qiskit-terra==0.16.0
         meta_repo.gh_repo.create_pull.assert_not_called()
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.0')
+        self.generate_mock.called_once_with(meta_repo)
 
     def test_get_log_string(self):
         version_pieces = ['0', '10', '2']

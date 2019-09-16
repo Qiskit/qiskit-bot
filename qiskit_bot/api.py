@@ -54,7 +54,7 @@ def setup():
     if not CONFIG:
         CONFIG = config.load_config('/etc/qiskit_bot.yaml')
     log_level = CONFIG.get('log_level', 'INFO')
-    default_log_format = ('%(asctime)s.%(msecs)d: %(process)d %(levelname)s '
+    default_log_format = ('%(asctime)s: %(process)d %(levelname)s '
                           '%(name)s [-] %(message)s')
     log_format = CONFIG.get('log_format', default_log_format)
 
@@ -155,7 +155,7 @@ def main():
     """Run APP."""
     global CONFIG
     CONFIG = config.load_config(sys.argv[1])
-    log_format = ('%(asctime)s.%(msecs)03d %(process)d %(levelname)s '
+    log_format = ('%(asctime)s %(process)d %(levelname)s '
                   '%(name)s [-] %(message)s')
     logging.basicConfig(level=logging.DEBUG, format=log_format)
     APP.run(debug=True, host='0.0.0.0', port=8281)

@@ -14,6 +14,7 @@
 
 import io
 import logging
+import multiprocessing
 import os
 import re
 import shutil
@@ -244,6 +245,10 @@ def finish_release(version_number, repo, conf, meta_repo):
                               categories)
         git.checkout_master(repo, pull=True)
 
-    with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):
-        bump_meta(meta_repo, repo, version_number)
-        git.checkout_master(meta_repo, pull=True)
+    def _meta_process():
+        with fasteners.InterProcessLock(os.path.join(lock_dir,
+                                                     meta_repo.name)):
+            bump_meta(meta_repo, repo, version_number)
+            git.checkout_master(meta_repo, pull=True)
+
+    multiprocessing.Process(target=_meta_process).start()

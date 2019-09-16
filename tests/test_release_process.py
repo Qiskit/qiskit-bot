@@ -17,6 +17,7 @@ import unittest
 
 import fixtures
 
+from qiskit_bot import config
 from qiskit_bot import release_process
 
 from . import fake_meta  # noqa
@@ -836,3 +837,42 @@ qiskit-terra==0.16.0
         version_pieces = ['0', '25', '0']
         self.assertEqual('0.25.0...0.24.0',
                          release_process._get_log_string(version_pieces))
+
+    @unittest.mock.patch.object(release_process, 'git')
+    @unittest.mock.patch.object(release_process, 'create_github_release')
+    @unittest.mock.patch.object(release_process, 'bump_meta')
+    def test_finish_release(self, bump_meta_mock, github_release_mock,
+                            git_mock):
+        meta_repo = unittest.mock.MagicMock()
+        meta_repo.name = 'qiskit'
+        repo = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        repo.repo_config = {'branch_on_release': False}
+        conf = {'working_dir': self.temp_dir.path}
+        release_process.finish_release('0.12.0', repo, conf, meta_repo)
+        bump_meta_mock.called_once_with(meta_repo, repo, '0.12.0')
+        github_release_mock.called_once_with(
+            repo, '0.12.0...0.11.0', '0.12.0',
+            config.default_changelog_categories)
+        git_mock.create_branch.assert_not_called()
+
+    @unittest.mock.patch.object(release_process, 'git')
+    @unittest.mock.patch.object(release_process, 'create_github_release')
+    @unittest.mock.patch.object(release_process, 'bump_meta')
+    def test_finish_release_with_branch(self, bump_meta_mock,
+                                        github_release_mock,
+                                        git_mock):
+        meta_repo = unittest.mock.MagicMock()
+        meta_repo.name = 'qiskit'
+        repo = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        repo.gh_repo.get_branches.return_value = []
+        repo.repo_config = {'branch_on_release': True}
+        conf = {'working_dir': self.temp_dir.path}
+        release_process.finish_release('0.12.0', repo, conf, meta_repo)
+        bump_meta_mock.called_once_with(meta_repo, repo, '0.12.0')
+        github_release_mock.called_once_with(
+            repo, '0.12.0...0.11.0', '0.12.0',
+            config.default_changelog_categories)
+        git_mock.create_branch.assert_called_once_with(
+            'stable/0.12', '0.12.0', repo, push=True)

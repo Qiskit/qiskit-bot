@@ -18,7 +18,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 
 import fasteners
 
@@ -31,7 +30,7 @@ LOG = logging.getLogger(__name__)
 def _regenerate_authors(repo):
     try:
         LOG.info('Regenerating authors list')
-        res = subprocess.run([sys.executable, 'tools/generate_authors.py'],
+        res = subprocess.run(['python', 'tools/generate_authors.py'],
                              capture_output=True, check=True,
                              cwd=repo.local_path)
         LOG.debug('generate_authors called\nstdout:\n%s\nstderr:\n%s' % (
@@ -42,7 +41,7 @@ def _regenerate_authors(repo):
         return
     try:
         LOG.info('Regenerating bibtex file')
-        res = subprocess.run([sys.executable, 'tools/generate_bibtex.py'],
+        res = subprocess.run(['python', 'tools/generate_bibtex.py'],
                              capture_output=True, check=True,
                              cwd=repo.local_path)
         LOG.debug('generate_bibtex called\nstdout:\n%s\nstderr:\n%s' % (

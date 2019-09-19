@@ -13,26 +13,45 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-import os
-import sys
+import argparse
 import tempfile
+
+from github import Github
 
 from qiskit_bot import config
 from qiskit_bot import repos
 from qiskit_bot import release_process
 
-if len(sys.argv) != 3:
-    print('Usage:\n\tgenerate_changelog.py "ORG/REPONAME" "TAG"')
-    print('Example:\n\tgenerate_changelog.py Qiskit/qiskit-terra 0.9.0')
-    sys.exit(1)
 
-repo_name = sys.argv[1]
-from_tag = sys.argv[2]
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('repo_name')
+    parser.add_argument('tag')
+    parser.add_argument('--token', '-t', help="optional token for auth",
+                        default=None)
+    parser.add_argument(
+        '--username', '-u',
+        help="optional username for auth, password required if specified",
+        default=None)
+    parser.add_argument(
+        '--password', '-p',
+        help="optional password for auth, username required if specified.",
+        default=None)
+    args = parser.parse_args()
 
-with tempfile.TemporaryDirectory() as tmpdir:
-    repo = repos.Repo(tmpdir, repo_name, None)
-    categories = repo.get_local_config().get(
-        'categories', config.default_changelog_categories)
+    with tempfile.TemporaryDirectory() as tmpdir:
+        token = args.token
+        repo = repos.Repo(tmpdir, args.repo_name, token)
+        if not token and args.username and args.password:
+            session = Github(args.username, args.password)
+            gh_repo = session.get_repo(args.repo_name)
+            repo.gh_repo = gh_repo
+        categories = repo.get_local_config().get(
+            'categories', config.default_changelog_categories)
 
-    print(release_process._generate_changelog(
-        repo, '%s..' % from_tag, categories))
+        print(release_process._generate_changelog(
+            repo, '%s..' % args.tag, categories))
+
+
+if __name__ == '__main__':
+    main()

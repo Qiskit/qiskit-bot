@@ -168,10 +168,18 @@ def _generate_changelog(repo, log_string, categories):
         pieces = line.split(' ')
         if 'tag:' in line:
             summary = ' '.join(pieces[3:])
-            pr = pr_regex.match(summary)[1][1:]
+            match = pr_regex.match(summary)
+            if match:
+                pr = match[1][1:]
+            else:
+                continue
         else:
             summary = ' '.join(pieces[1:])
-            pr = pr_regex.match(summary)[1][1:]
+            match = pr_regex.match(summary)
+            if match:
+                pr = match[1][1:]
+            else:
+                continue
         git_summaries.append((summary, pr))
     changelog_dict = {x: [] for x in categories.keys()}
     for summary, pr in git_summaries:

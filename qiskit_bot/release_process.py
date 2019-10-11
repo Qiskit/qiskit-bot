@@ -235,6 +235,7 @@ def finish_release(version_number, repo, conf, meta_repo):
     repo_config = repo.repo_config
     version_number_pieces = version_number.split('.')
     branch_number = '.'.join(version_number_pieces[:2])
+
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
         # Pull latest master
         git.checkout_master(repo, pull=True)
@@ -246,12 +247,17 @@ def finish_release(version_number, repo, conf, meta_repo):
                 git.checkout_master(repo, pull=True)
                 git.create_branch(branch_name, version_number, repo, push=True)
 
-        log_string = _get_log_string(version_number_pieces)
-        categories = repo.get_local_config().get(
-            'categories', config.default_changelog_categories)
-        create_github_release(repo, log_string, version_number,
-                              categories)
-        git.checkout_master(repo, pull=True)
+    def _changelog_process():
+        with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
+            git.checkout_master(repo, pull=True)
+            log_string = _get_log_string(version_number_pieces)
+            categories = repo.get_local_config().get(
+                'categories', config.default_changelog_categories)
+            create_github_release(repo, log_string, version_number,
+                                  categories)
+            git.checkout_master(repo, pull=True)
+
+    multiprocessing.Process(target=_changelog_process).start()
 
     def _meta_process():
         with fasteners.InterProcessLock(os.path.join(lock_dir,

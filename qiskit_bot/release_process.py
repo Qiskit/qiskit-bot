@@ -157,7 +157,7 @@ def bump_meta(meta_repo, repo, version_number):
         bump_pr.edit(body=new_body)
 
 
-def _generate_changelog(repo, log_string, categories):
+def _generate_changelog(repo, log_string, categories, show_missing=False):
     git.checkout_master(repo, pull=True)
     git_log = git.get_git_log(repo, log_string).decode('utf8')
     if not git_log:
@@ -177,16 +177,24 @@ def _generate_changelog(repo, log_string, categories):
             summary = ' '.join(pieces[1:])
             match = pr_regex.match(summary)
             if match:
-                pr = match[1][1:]
+                if match[1][1:]:
+                    pr = match[1][1:]
+                else:
+                    continue
             else:
                 continue
         git_summaries.append((summary, pr))
     changelog_dict = {x: [] for x in categories.keys()}
+    missing_list = []
     for summary, pr in git_summaries:
         labels = [x.name for x in repo.gh_repo.get_pull(int(pr)).labels]
         for label in labels:
             if label in changelog_dict:
                 changelog_dict[label].append(summary)
+            else:
+                if show_missing:
+                    if summary not in missing_list:
+                        missing_list.append(summary)
     changelog = "# Changelog\n"
     for label in changelog_dict:
         if not changelog_dict[label]:
@@ -196,6 +204,12 @@ def _generate_changelog(repo, log_string, categories):
             entry = '-   %s\n' % pr
             changelog += entry
         changelog += ('\n')
+    if show_missing:
+        if missing_list:
+            changelog += ('\n')
+            changelog += '## No changelog entry\n'
+            for entry in missing_list:
+                changelog += '-   %s\n' % entry
     return changelog
 
 

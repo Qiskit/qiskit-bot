@@ -188,13 +188,14 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
     missing_list = []
     for summary, pr in git_summaries:
         labels = [x.name for x in repo.gh_repo.get_pull(int(pr)).labels]
+        label_found = False
         for label in labels:
             if label in changelog_dict:
                 changelog_dict[label].append(summary)
-            else:
-                if show_missing:
-                    if summary not in missing_list:
-                        missing_list.append(summary)
+                label_found = True
+        if not label_found:
+            if show_missing:
+                missing_list.append(summary)
     changelog = "# Changelog\n"
     for label in changelog_dict:
         if not changelog_dict[label]:

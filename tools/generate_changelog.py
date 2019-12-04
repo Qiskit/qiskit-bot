@@ -50,7 +50,7 @@ def main():
             'categories', config.default_changelog_categories)
 
         print(release_process._generate_changelog(
-            repo, '%s..' % args.tag, categories))
+            repo, '%s..' % args.tag, categories, show_missing=True))
 
 
 if __name__ == '__main__':

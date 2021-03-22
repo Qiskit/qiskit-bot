@@ -187,6 +187,11 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
     changelog_dict = {x: [] for x in categories.keys()}
     missing_list = []
     for summary, pr in git_summaries:
+        try:
+            pr_number = int(pr)
+        except ValueError:
+            # Invalid PR number
+            continue
         labels = [x.name for x in repo.gh_repo.get_pull(int(pr)).labels]
         label_found = False
         for label in labels:

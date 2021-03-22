@@ -876,3 +876,27 @@ qiskit-terra==0.16.0
             config.default_changelog_categories)
         git_mock.create_branch.assert_called_once_with(
             'stable/0.12', '0.12.0', repo, push=True)
+
+    @unittest.mock.patch.object(release_process, 'git')
+    def test_generate_changelog_with_invalid_PR_number(self, git_mock):
+        repo = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        repo.gh_repo.get_branches.return_value = []
+        repo.repo_config = {'branch_on_release': True}
+        fake_log = """403bc40f8 Add PauliSumOp (Qiskit/qiskit-aqua#1440)
+5a7f41344 Tune performance of optimize_1q_decomposition (#5682)
+6e2542243 Change collect_1q_runs return for performance (#5685)
+25eb58a29 Add unroll step to level2 passmanager optimization loop (#5671)
+"""
+        git_mock.get_git_log.return_value = fake_log.encode('utf8')
+        res = release_process._generate_changelog(
+            repo, '0.17.0...0.16.0',
+            config.default_changelog_categories, True)
+        expected = """# Changelog
+
+## No changelog entry
+-   Tune performance of optimize_1q_decomposition (#5682)
+-   Change collect_1q_runs return for performance (#5685)
+-   Add unroll step to level2 passmanager optimization loop (#5671)
+"""
+        self.assertEqual(res, expected)

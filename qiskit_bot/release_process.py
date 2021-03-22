@@ -192,7 +192,7 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
         except ValueError:
             # Invalid PR number
             continue
-        labels = [x.name for x in repo.gh_repo.get_pull(int(pr)).labels]
+        labels = [x.name for x in repo.gh_repo.get_pull(pr_number).labels]
         label_found = False
         for label in labels:
             if label in changelog_dict:

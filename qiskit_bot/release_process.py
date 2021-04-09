@@ -54,11 +54,13 @@ def _regenerate_authors(repo):
 
 
 def bump_meta(meta_repo, repo, version_number):
+    repo_config = repo.repo_config
     git.checkout_master(meta_repo, pull=True)
     version_number_pieces = version_number.split('.')
     meta_version = git.get_latest_tag(meta_repo).decode('utf8')
     meta_version_pieces = meta_version.split('.')
-    if int(version_number_pieces[2]) == 0:
+    if int(version_number_pieces[2]) == 0 and not repo_config.get(
+            'optional_package'):
         new_meta_version = '%s.%s.%s' % (meta_version_pieces[0],
                                          int(meta_version_pieces[1]) + 1, 0)
     else:

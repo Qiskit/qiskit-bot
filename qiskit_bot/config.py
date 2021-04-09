@@ -41,6 +41,7 @@ schema = vol.Schema({
     vol.Required('repos'): vol.All([{
         vol.Required('name'): str,
         vol.Optional('branch_on_release', default=False): bool,
+        vol.Optional('optional_package', default=False): bool,
     }]),
 })
 

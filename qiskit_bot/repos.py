@@ -28,7 +28,10 @@ class Repo(object):
         self.repo_name = repo_name
         self.name = self._get_name()
         self.gh_repo = self._get_gh_repo(access_token)
-        self.repo_config = repo_config
+        if repo_config is None:
+            self.repo_config = {}
+        else:
+            self.repo_config = repo_config
         if not os.path.isdir(self.local_path):
             self._create_repo()
             self._create_ssh_remote()

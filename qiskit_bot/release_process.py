@@ -55,7 +55,7 @@ def _regenerate_authors(repo):
 
 def bump_meta(meta_repo, repo, version_number):
     repo_config = repo.repo_config
-    git.checkout_master(meta_repo, pull=True)
+    git.checkout_default_branch(meta_repo, pull=True)
     version_number_pieces = version_number.split('.')
     meta_version = git.get_latest_tag(meta_repo).decode('utf8')
     meta_version_pieces = meta_version.split('.')
@@ -84,7 +84,8 @@ def bump_meta(meta_repo, repo, version_number):
             git.pull_remote_ref_to_local(meta_repo, 'bump_meta')
             break
     else:
-        git.create_branch('bump_meta', 'origin/master', meta_repo)
+        branch_name = meta_repo.repo_config.get('default_branch', 'master')
+        git.create_branch('bump_meta', 'origin/%s' % branch_name, meta_repo)
         git.checkout_ref(meta_repo, 'bump_meta')
     # Update setup.py
     buf = io.StringIO()
@@ -150,9 +151,10 @@ def bump_meta(meta_repo, repo, version_number):
     commit_msg = 'Bump version for %s\n\n%s' % (requirements_str, body)
     git.create_git_commit_for_all(meta_repo, commit_msg.encode('utf8'))
     git.push_ref_to_github(meta_repo, 'bump_meta')
+    branch_name = meta_repo.repo_config.get('default_branch', 'master')
     if not bump_pr:
-        meta_repo.gh_repo.create_pull(title, base='master', head='bump_meta',
-                                      body=body)
+        meta_repo.gh_repo.create_pull(title, base=branch_name,
+                                      head='bump_meta', body=body)
     else:
         old_body = bump_pr.body
         new_body = old_body + '\n' + requirements_str
@@ -160,7 +162,7 @@ def bump_meta(meta_repo, repo, version_number):
 
 
 def _generate_changelog(repo, log_string, categories, show_missing=False):
-    git.checkout_master(repo, pull=True)
+    git.checkout_default_branch(repo, pull=True)
     git_log = git.get_git_log(repo, log_string).decode('utf8')
     if not git_log:
         return ''
@@ -259,25 +261,25 @@ def finish_release(version_number, repo, conf, meta_repo):
     branch_number = '.'.join(version_number_pieces[:2])
 
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
-        # Pull latest master
-        git.checkout_master(repo, pull=True)
+        # Pull latest default_branch
+        git.checkout_default_branch(repo, pull=True)
         if repo_config.get('branch_on_release'):
             branch_name = 'stable/%s' % branch_number
             repo_branches = [x.name for x in repo.gh_repo.get_branches()]
             if int(version_number_pieces[2]) == 0 and \
                     branch_name not in repo_branches:
-                git.checkout_master(repo, pull=True)
+                git.checkout_default_branch(repo, pull=True)
                 git.create_branch(branch_name, version_number, repo, push=True)
 
     def _changelog_process():
         with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
-            git.checkout_master(repo, pull=True)
+            git.checkout_default_branch(repo, pull=True)
             log_string = _get_log_string(version_number_pieces)
             categories = repo.get_local_config().get(
                 'categories', config.default_changelog_categories)
             create_github_release(repo, log_string, version_number,
                                   categories)
-            git.checkout_master(repo, pull=True)
+            git.checkout_default_branch(repo, pull=True)
 
     multiprocessing.Process(target=_changelog_process).start()
 
@@ -285,6 +287,6 @@ def finish_release(version_number, repo, conf, meta_repo):
         with fasteners.InterProcessLock(os.path.join(lock_dir,
                                                      meta_repo.name)):
             bump_meta(meta_repo, repo, version_number)
-            git.checkout_master(meta_repo, pull=True)
+            git.checkout_default_branch(meta_repo, pull=True)
 
     multiprocessing.Process(target=_meta_process).start()

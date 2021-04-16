@@ -124,27 +124,28 @@ def create_git_commit_for_all(repo, commit_msg):
     return True
 
 
-def checkout_master(repo, pull=True):
-    cmd = ['git', 'checkout', 'master']
+def checkout_default_branch(repo, pull=True):
+    default_branch = repo.repo_config.get('default_branch', 'master')
+    cmd = ['git', 'checkout', default_branch]
     LOG.info('Checking out branch of %s' % repo.local_path)
     try:
         res = subprocess.run(cmd, capture_output=True, check=True,
                              cwd=repo.local_path)
-        LOG.debug('Git master checkout for %s, stdout:\n%s\nstderr:\n%s' % (
+        LOG.debug('Git checkout for %s, stdout:\n%s\nstderr:\n%s' % (
             repo.local_path, res.stdout, res.stderr))
     except subprocess.CompletedProcess as e:
-        LOG.exception('Git master checkout failed\nstdout:\n%s\nstderr:\n%s\n'
+        LOG.exception('Git checkout failed\nstdout:\n%s\nstderr:\n%s\n'
                       % (e.stdout, e.stderr))
         return False
     if not pull:
         return True
     cmd = ['git', 'pull']
-    LOG.info('Pulling the latest master for %s' % repo.local_path)
+    LOG.info('Pulling the latest default branch for %s' % repo.local_path)
     try:
         subprocess.run(cmd, capture_output=True, check=True,
                        cwd=repo.local_path)
     except subprocess.CompletedProcess as e:
-        LOG.exception('Git pull master failed\nstdout:\n%s\nstderr:\n%s\n'
+        LOG.exception('Git pull failed\nstdout:\n%s\nstderr:\n%s\n'
                       % (e.stdout, e.stderr))
         return False
 
@@ -156,7 +157,7 @@ def get_latest_tag(repo):
         res = subprocess.run(cmd, capture_output=True, check=True,
                              cwd=repo.local_path)
     except subprocess.CompletedProcess as e:
-        LOG.exception('Git pull master failed\nstdout:\n%s\nstderr:\n%s\n'
+        LOG.exception('Git get latest tag failed\nstdout:\n%s\nstderr:\n%s\n'
                       % (e.stdout, e.stderr))
         raise
     return res.stdout

@@ -76,8 +76,9 @@ def setup():
     with fasteners.InterProcessLock(
             os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
                          CONFIG['meta_repo'])):
+        repo_config = {'default_branch': CONFIG['meta_repo_default_branch']}
         META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
-                               CONFIG['api_key'])
+                               CONFIG['api_key'], repo_config=repo_config)
     # NOTE(mtreinish): This is a workaround until there is a supported method
     # to set a secret post-init. See:
     # https://github.com/bloomberg/python-github-webhook/pull/19
@@ -142,7 +143,7 @@ def on_pull_event(data):
                     META_REPO.gh_repo.get_git_ref(
                         "heads/" 'bump_meta').delete()
                     # Delete local branch
-                    git.checkout_master(META_REPO)
+                    git.checkout_default_branch(META_REPO)
                     git.delete_local_branch('bump_meta', META_REPO)
 
 

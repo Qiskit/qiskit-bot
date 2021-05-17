@@ -28,6 +28,7 @@ default_changelog_categories = {
     'Changelog: API Change': 'Changed',
     'Changelog: Removal': 'Removed',
     'Changelog: Bugfix': 'Fixed',
+    'Changelog: None': None,
 }
 
 

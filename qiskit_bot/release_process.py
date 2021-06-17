@@ -200,6 +200,9 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
         label_found = False
         for label in labels:
             if label in changelog_dict:
+                if categories[label] is None:
+                    label_found = True
+                    break
                 changelog_dict[label].append(summary)
                 label_found = True
         if not label_found:
@@ -217,7 +220,7 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
     if show_missing:
         if missing_list:
             changelog += ('\n')
-            changelog += '## No changelog entry\n'
+            changelog += '## Missing changelog entry\n'
             for entry in missing_list:
                 changelog += '-   %s\n' % entry
     return changelog

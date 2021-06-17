@@ -922,7 +922,7 @@ qiskit-terra==0.16.0
             config.default_changelog_categories, True)
         expected = """# Changelog
 
-## No changelog entry
+## Missing changelog entry
 -   Tune performance of optimize_1q_decomposition (#5682)
 -   Change collect_1q_runs return for performance (#5685)
 -   Add unroll step to level2 passmanager optimization loop (#5671)
@@ -958,7 +958,7 @@ qiskit-terra==0.16.0
             config.default_changelog_categories, True)
         expected = """# Changelog
 
-## No changelog entry
+## Missing changelog entry
 -   Tune performance of optimize_1q_decomposition (#5682)
 -   Add unroll step to level2 passmanager optimization loop (#5671)
 """

@@ -220,7 +220,7 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
     if show_missing:
         if missing_list:
             changelog += ('\n')
-            changelog += '## No changelog entry\n'
+            changelog += '## Missing changelog entry\n'
             for entry in missing_list:
                 changelog += '-   %s\n' % entry
     return changelog

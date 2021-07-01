@@ -37,11 +37,17 @@ def main():
         '--password', '-p',
         help="optional password for auth, username required if specified.",
         default=None)
+    parser.add_argument(
+        '--default-branch', '-b',
+        help="the default branch to use for the repository. Defaults to "
+             "'main'",
+        default='main')
     args = parser.parse_args()
 
     with tempfile.TemporaryDirectory() as tmpdir:
         token = args.token
-        repo = repos.Repo(tmpdir, args.repo_name, token)
+        repo = repos.Repo(tmpdir, args.repo_name, token,
+                          {'default_branch': args.default_branch})
         if not token and args.username and args.password:
             session = Github(args.username, args.password)
             gh_repo = session.get_repo(args.repo_name)

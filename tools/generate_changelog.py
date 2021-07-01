@@ -39,7 +39,8 @@ def main():
         default=None)
     parser.add_argument(
         '--default-branch', '-b',
-        help="the default branch to use for the repository. Defaults to 'main'",
+        help="the default branch to use for the repository. Defaults to "
+             "'main'",
         default='main')
     args = parser.parse_args()
 

@@ -59,8 +59,9 @@ def bump_meta(meta_repo, repo, version_number):
     version_number_pieces = version_number.split('.')
     meta_version = git.get_latest_tag(meta_repo).decode('utf8')
     meta_version_pieces = meta_version.split('.')
-    if int(version_number_pieces[2]) == 0 and not repo_config.get(
-            'optional_package'):
+    if repo_config.get('optional_package'):
+        return None
+    if int(version_number_pieces[2]) == 0:
         new_meta_version = '%s.%s.%s' % (meta_version_pieces[0],
                                          int(meta_version_pieces[1]) + 1, 0)
     else:
@@ -292,4 +293,7 @@ def finish_release(version_number, repo, conf, meta_repo):
             bump_meta(meta_repo, repo, version_number)
             git.checkout_default_branch(meta_repo, pull=True)
 
-    multiprocessing.Process(target=_meta_process).start()
+    # Only bump the metapackage for tracked/required packages optional extra
+    # versions are not pinned
+    if not repo.repo_config.get('optional_package'):
+        multiprocessing.Process(target=_meta_process).start()

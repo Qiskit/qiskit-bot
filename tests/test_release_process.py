@@ -982,27 +982,17 @@ qiskit-terra==0.16.0
         version_number = '0.16.1'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.16.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.16.1
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.1",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.20.1",')
+                    self.assertEqual(line.strip(), 'version="0.20.0",')
                     meta_bump = True
                 else:
                     continue
@@ -1011,16 +1001,13 @@ qiskit-terra==0.16.1
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), "release = '0.20.0'")
                     break
             else:
                 self.fail('Release not updated in doc config')
 
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.16.1\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_minor_with_unrelated_pulls_optional(
@@ -1045,27 +1032,17 @@ qiskit-terra==0.16.1
         version_number = '0.16.1'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.16.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.16.1
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.1",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.20.1",')
+                    self.assertEqual(line.strip(), 'version="0.20.0",')
                     meta_bump = True
                 else:
                     continue
@@ -1074,15 +1051,12 @@ qiskit-terra==0.16.1
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), "release = '0.20.0'")
                     break
             else:
                 self.fail('Release not updated in doc config')
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.16.1\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_minor_with_existing_pulls_optional(
@@ -1111,24 +1085,15 @@ qiskit-terra==0.16.1
 
         release_process.bump_meta(meta_repo, repo, version_number)
         git_mock.create_branch.assert_not_called()
-        git_mock.checkout_ref.assert_called_once_with(meta_repo, 'bump_meta')
-        git_mock.pull_remote_ref_to_local.assert_called_once_with(
-            meta_repo, 'bump_meta')
-        commit_msg = """Bump version for qiskit-terra==0.16.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.16.1
-
-"""
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.checkout_ref.assert_not_called()
+        git_mock.pull_remote_ref_to_local.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.1",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
                     self.assertEqual(line.strip(), 'version="0.20.0",')
@@ -1146,9 +1111,8 @@ qiskit-terra==0.16.1
             else:
                 self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
-        existing_pull_mock.edit.assert_called_once_with(
-            body='Fake old body\nqiskit-terra==0.16.1')
-        self.generate_mock.called_once_with(meta_repo)
+        existing_pull_mock.edit.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_patch_with_no_pulls_optional_package(
@@ -1168,27 +1132,17 @@ qiskit-terra==0.16.1
         version_number = '0.9.1'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.9.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.9.1
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.9.1",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.9.0",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.15.2",')
+                    self.assertEqual(line.strip(), 'version="0.15.1",')
                     meta_bump = True
                 else:
                     continue
@@ -1198,15 +1152,12 @@ qiskit-terra==0.9.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    self.assertEqual(line.strip(), "release = '0.15.1'")
                     break
             else:
                 self.fail('Release not updated in doc config')
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.9.1\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_patch_with_unrelated_pulls_optional(
@@ -1232,18 +1183,8 @@ qiskit-terra==0.9.1
         version_number = '0.9.1'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.9.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.9.1
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
@@ -1252,7 +1193,7 @@ qiskit-terra==0.9.1
                     self.assertEqual(line.strip(), '"qiskit-terra==0.9.1",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.15.2",')
+                    self.assertEqual(line.strip(), 'version="0.15.1",')
                     meta_bump = True
                 else:
                     continue
@@ -1262,15 +1203,12 @@ qiskit-terra==0.9.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    self.assertEqual(line.strip(), "release = '0.15.1'")
                     break
             else:
                 self.fail('Release not updated in doc config')
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.9.1\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_pending_patch_release_pr_optional(
@@ -1299,24 +1237,15 @@ qiskit-terra==0.9.1
 
         release_process.bump_meta(meta_repo, repo, version_number)
         git_mock.create_branch.assert_not_called()
-        git_mock.checkout_ref.assert_called_once_with(meta_repo, 'bump_meta')
-        git_mock.pull_remote_ref_to_local.assert_called_once_with(
-            meta_repo, 'bump_meta')
-        commit_msg = """Bump version for qiskit-terra==0.16.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.16.1
-
-"""
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.checkout_ref.assert_not_called()
+        git_mock.pull_remote_ref_to_local.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.1",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
                     self.assertEqual(line.strip(), 'version="0.15.1",')
@@ -1334,9 +1263,8 @@ qiskit-terra==0.16.1
             else:
                 self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
-        existing_pull_mock.edit.assert_called_once_with(
-            body='Fake old body\nqiskit-terra==0.16.1')
-        self.generate_mock.called_once_with(meta_repo)
+        existing_pull_mock.edit.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_pending_minor_release_pr_optional(
@@ -1365,24 +1293,15 @@ qiskit-terra==0.16.1
 
         release_process.bump_meta(meta_repo, repo, version_number)
         git_mock.create_branch.assert_not_called()
-        git_mock.checkout_ref.assert_called_once_with(meta_repo, 'bump_meta')
-        git_mock.pull_remote_ref_to_local.assert_called_once_with(
-            meta_repo, 'bump_meta')
-        commit_msg = """Bump version for qiskit-terra==0.16.1
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.16.1
-
-"""
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.checkout_ref.assert_not_called()
+        git_mock.pull_remote_ref_to_local.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.1",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
                     self.assertEqual(line.strip(), 'version="0.16.0",')
@@ -1401,9 +1320,8 @@ qiskit-terra==0.16.1
                 self.fail('Release not updated in doc config')
 
         meta_repo.gh_repo.create_pull.assert_not_called()
-        existing_pull_mock.edit.assert_called_once_with(
-            body='Fake old body\nqiskit-terra==0.16.1')
-        self.generate_mock.called_once_with(meta_repo)
+        existing_pull_mock.edit.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_minor_no_pulls_optional(self,
@@ -1423,27 +1341,17 @@ qiskit-terra==0.16.1
         version_number = '0.17.0'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.17.0
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.17.0
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.17.0",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.20.1",')
+                    self.assertEqual(line.strip(), 'version="0.20.0",')
                     meta_bump = True
                 else:
                     continue
@@ -1453,15 +1361,12 @@ qiskit-terra==0.17.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), "release = '0.20.0'")
                     break
             else:
                 self.fail('Release not updated in doc config')
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.17.0\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_minor_with_unrelated_pulls_optional(
@@ -1486,27 +1391,17 @@ qiskit-terra==0.17.0
         version_number = '0.17.0'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.17.0
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.17.0
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.17.0",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.20.1",')
+                    self.assertEqual(line.strip(), 'version="0.20.0",')
                     meta_bump = True
                 else:
                     continue
@@ -1516,16 +1411,13 @@ qiskit-terra==0.17.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), "release = '0.20.0'")
                     break
             else:
                 self.fail('Release not updated in doc config')
 
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.17.0\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_minor_with_existing_pulls_optional(
@@ -1554,24 +1446,15 @@ qiskit-terra==0.17.0
 
         release_process.bump_meta(meta_repo, repo, version_number)
         git_mock.create_branch.assert_not_called()
-        git_mock.checkout_ref.assert_called_once_with(meta_repo, 'bump_meta')
-        git_mock.pull_remote_ref_to_local.assert_called_once_with(
-            meta_repo, 'bump_meta')
-        commit_msg = """Bump version for qiskit-terra==0.17.0
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.17.0
-
-"""
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.checkout_ref.assert_not_called()
+        git_mock.pull_remote_ref_to_local.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.17.0",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
                     terra_bump = True
                 elif 'version=' in line:
                     self.assertEqual(line.strip(), 'version="0.20.0",')
@@ -1589,9 +1472,8 @@ qiskit-terra==0.17.0
             else:
                 self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
-        existing_pull_mock.edit.assert_called_once_with(
-            body='Fake old body\nqiskit-terra==0.17.0')
-        self.generate_mock.called_once_with(meta_repo)
+        existing_pull_mock.edit.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_patch_with_no_pulls_optional(
@@ -1611,27 +1493,17 @@ qiskit-terra==0.17.0
         version_number = '0.10.0'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.10.0
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.10.0
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.10.0",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.9.1",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.15.2",')
+                    self.assertEqual(line.strip(), 'version="0.15.1",')
                     meta_bump = True
                 else:
                     continue
@@ -1641,15 +1513,12 @@ qiskit-terra==0.10.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    self.assertEqual(line.strip(), "release = '0.15.1'")
                     break
             else:
                 self.fail('Release not updated in doc config')
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.10.0\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_minor_release_from_patch_with_unrelated_pulls_optional(
@@ -1675,27 +1544,17 @@ qiskit-terra==0.10.0
         version_number = '0.10.0'
 
         release_process.bump_meta(meta_repo, repo, version_number)
-        git_mock.create_branch.assert_called_once_with(
-            'bump_meta', 'origin/master', meta_repo)
-        commit_msg = """Bump version for qiskit-terra==0.10.0
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.10.0
-
-"""
-
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.create_branch.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.10.0",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.9.0",')
                     terra_bump = True
                 elif 'version=' in line:
-                    self.assertEqual(line.strip(), 'version="0.15.2",')
+                    self.assertEqual(line.strip(), 'version="0.15.1",')
                     meta_bump = True
                 else:
                     continue
@@ -1705,15 +1564,12 @@ qiskit-terra==0.10.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    self.assertEqual(line.strip(), "release = '0.15.1'")
                     break
             else:
                 self.fail('Release not updated in doc config')
-        body = ("Bump the meta repo version to include:\n\n"
-                "qiskit-terra==0.10.0\n\n")
-        meta_repo.gh_repo.create_pull.assert_called_once_with(
-            'Bump Meta', base='master', head='bump_meta', body=body)
-        self.generate_mock.called_once_with(meta_repo)
+        meta_repo.gh_repo.create_pull.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_minor_release_from_pending_patch_release_pr_optional(
@@ -1742,24 +1598,15 @@ qiskit-terra==0.10.0
 
         release_process.bump_meta(meta_repo, repo, version_number)
         git_mock.create_branch.assert_not_called()
-        git_mock.checkout_ref.assert_called_once_with(meta_repo, 'bump_meta')
-        git_mock.pull_remote_ref_to_local.assert_called_once_with(
-            meta_repo, 'bump_meta')
-        commit_msg = """Bump version for qiskit-terra==0.16.0
-
-Bump the meta repo version to include:
-
-qiskit-terra==0.16.0
-
-"""
-        git_mock.create_git_commit_for_all.assert_called_once_with(
-            meta_repo, commit_msg.encode('utf8'))
+        git_mock.checkout_ref.assert_not_called()
+        git_mock.pull_remote_ref_to_local.assert_not_called()
+        git_mock.create_git_commit_for_all.assert_not_called()
         with open(os.path.join(self.temp_dir.path, 'setup.py'), 'r') as fd:
             terra_bump = False
             meta_bump = False
             for line in fd:
                 if 'qiskit-terra' in line:
-                    self.assertEqual(line.strip(), '"qiskit-terra==0.16.0",')
+                    self.assertEqual(line.strip(), '"qiskit-terra==0.15.0",')
                     terra_bump = True
                 elif 'version=' in line:
                     self.assertEqual(line.strip(), 'version="0.20.1",')
@@ -1777,9 +1624,8 @@ qiskit-terra==0.16.0
             else:
                 self.fail('Release not updated in doc config')
         meta_repo.gh_repo.create_pull.assert_not_called()
-        existing_pull_mock.edit.assert_called_once_with(
-            body='Fake old body\nqiskit-terra==0.16.0')
-        self.generate_mock.called_once_with(meta_repo)
+        existing_pull_mock.edit.assert_not_called()
+        self.generate_mock.assert_not_called()
 
     @unittest.mock.patch.object(release_process, 'git')
     def test_bump_meta_patch_release_from_minor_no_pulls_main(self, git_mock):

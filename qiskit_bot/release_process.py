@@ -14,9 +14,11 @@
 
 import io
 import logging
+import multiprocessing
 import os
 import re
 import shutil
+import subprocess
 
 import fasteners
 
@@ -26,11 +28,39 @@ from qiskit_bot import git
 LOG = logging.getLogger(__name__)
 
 
+def _regenerate_authors(repo):
+    try:
+        LOG.info('Regenerating authors list')
+        res = subprocess.run(['python', 'tools/generate_authors.py'],
+                             capture_output=True, check=True,
+                             cwd=repo.local_path)
+        LOG.debug('generate_authors called\nstdout:\n%s\nstderr:\n%s' % (
+            res.stdout, res.stderr))
+    except subprocess.CalledProcessError as e:
+        LOG.exception("Failed to generate_authors\nstdout:\n%s\nstderr:\n%s"
+                      % (e.stdout, e.stderr))
+        return
+    try:
+        LOG.info('Regenerating bibtex file')
+        res = subprocess.run(['python', 'tools/generate_bibtex.py'],
+                             capture_output=True, check=True,
+                             cwd=repo.local_path)
+        LOG.debug('generate_bibtex called\nstdout:\n%s\nstderr:\n%s' % (
+            res.stdout, res.stderr))
+    except subprocess.CalledProcessError as e:
+        LOG.exception("Failed to generate_authors\nstdout:\n%s\nstderr:\n%s"
+                      % (e.stdout, e.stderr))
+        return
+
+
 def bump_meta(meta_repo, repo, version_number):
-    git.checkout_master(meta_repo, pull=True)
+    repo_config = repo.repo_config
+    git.checkout_default_branch(meta_repo, pull=True)
     version_number_pieces = version_number.split('.')
     meta_version = git.get_latest_tag(meta_repo).decode('utf8')
     meta_version_pieces = meta_version.split('.')
+    if repo_config.get('optional_package'):
+        return None
     if int(version_number_pieces[2]) == 0:
         new_meta_version = '%s.%s.%s' % (meta_version_pieces[0],
                                          int(meta_version_pieces[1]) + 1, 0)
@@ -55,7 +85,8 @@ def bump_meta(meta_repo, repo, version_number):
             git.pull_remote_ref_to_local(meta_repo, 'bump_meta')
             break
     else:
-        git.create_branch('bump_meta', 'origin/master', meta_repo)
+        branch_name = meta_repo.repo_config.get('default_branch', 'master')
+        git.create_branch('bump_meta', 'origin/%s' % branch_name, meta_repo)
         git.checkout_ref(meta_repo, 'bump_meta')
     # Update setup.py
     buf = io.StringIO()
@@ -110,6 +141,8 @@ def bump_meta(meta_repo, repo, version_number):
     with open(docs_conf_path, 'w') as fd:
         shutil.copyfileobj(buf, fd)
 
+    _regenerate_authors(meta_repo)
+
     body = """Bump the meta repo version to include:
 
 %s
@@ -119,17 +152,18 @@ def bump_meta(meta_repo, repo, version_number):
     commit_msg = 'Bump version for %s\n\n%s' % (requirements_str, body)
     git.create_git_commit_for_all(meta_repo, commit_msg.encode('utf8'))
     git.push_ref_to_github(meta_repo, 'bump_meta')
+    branch_name = meta_repo.repo_config.get('default_branch', 'master')
     if not bump_pr:
-        meta_repo.gh_repo.create_pull(title, base='master', head='bump_meta',
-                                      body=body)
+        meta_repo.gh_repo.create_pull(title, base=branch_name,
+                                      head='bump_meta', body=body)
     else:
         old_body = bump_pr.body
         new_body = old_body + '\n' + requirements_str
         bump_pr.edit(body=new_body)
 
 
-def _generate_changelog(repo, log_string, categories):
-    git.checkout_master(repo, pull=True)
+def _generate_changelog(repo, log_string, categories, show_missing=False):
+    git.checkout_default_branch(repo, pull=True)
     git_log = git.get_git_log(repo, log_string).decode('utf8')
     if not git_log:
         return ''
@@ -139,17 +173,42 @@ def _generate_changelog(repo, log_string, categories):
         pieces = line.split(' ')
         if 'tag:' in line:
             summary = ' '.join(pieces[3:])
-            pr = pr_regex.match(summary)[1][1:]
+            match = pr_regex.match(summary)
+            if match:
+                pr = match[1][1:]
+            else:
+                continue
         else:
             summary = ' '.join(pieces[1:])
-            pr = pr_regex.match(summary)[1][1:]
+            match = pr_regex.match(summary)
+            if match:
+                if match[1][1:]:
+                    pr = match[1][1:]
+                else:
+                    continue
+            else:
+                continue
         git_summaries.append((summary, pr))
     changelog_dict = {x: [] for x in categories.keys()}
+    missing_list = []
     for summary, pr in git_summaries:
-        labels = [x.name for x in repo.gh_repo.get_pull(int(pr)).labels]
+        try:
+            pr_number = int(pr)
+        except ValueError:
+            # Invalid PR number
+            continue
+        labels = [x.name for x in repo.gh_repo.get_pull(pr_number).labels]
+        label_found = False
         for label in labels:
             if label in changelog_dict:
+                if categories[label] is None:
+                    label_found = True
+                    break
                 changelog_dict[label].append(summary)
+                label_found = True
+        if not label_found:
+            if show_missing:
+                missing_list.append(summary)
     changelog = "# Changelog\n"
     for label in changelog_dict:
         if not changelog_dict[label]:
@@ -159,6 +218,12 @@ def _generate_changelog(repo, log_string, categories):
             entry = '-   %s\n' % pr
             changelog += entry
         changelog += ('\n')
+    if show_missing:
+        if missing_list:
+            changelog += ('\n')
+            changelog += '## Missing changelog entry\n'
+            for entry in missing_list:
+                changelog += '-   %s\n' % entry
     return changelog
 
 
@@ -168,6 +233,29 @@ def create_github_release(repo, log_string, version_number, categories):
     repo.gh_repo.create_git_release(version_number, release_name, changelog)
 
 
+def _get_log_string(version_number_pieces):
+    version_number = '.'.join(version_number_pieces)
+    # If a patch release log between 0.A.X..0.A.X-1
+    if int(version_number_pieces[2]) > 0:
+        old_version_string = '%s.%s.%s' % (
+            version_number_pieces[0],
+            version_number_pieces[1],
+            int(version_number_pieces[2]) - 1)
+        log_string = '%s...%s' % (
+            version_number,
+            old_version_string)
+    # If a minor release log between 0.X.0..0.X-1.0
+    else:
+        old_version_string = '%s.%s.%s' % (
+            version_number_pieces[0],
+            int(version_number_pieces[1]) - 1,
+            0)
+        log_string = '%s...%s' % (
+            version_number,
+            old_version_string)
+    return log_string
+
+
 def finish_release(version_number, repo, conf, meta_repo):
     """Do the post tag release processes."""
     working_dir = conf.get('working_dir')
@@ -175,41 +263,37 @@ def finish_release(version_number, repo, conf, meta_repo):
     repo_config = repo.repo_config
     version_number_pieces = version_number.split('.')
     branch_number = '.'.join(version_number_pieces[:2])
+
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
-        # Pull latest master
-        git.checkout_master(repo, pull=True)
+        # Pull latest default_branch
+        git.checkout_default_branch(repo, pull=True)
         if repo_config.get('branch_on_release'):
             branch_name = 'stable/%s' % branch_number
             repo_branches = [x.name for x in repo.gh_repo.get_branches()]
             if int(version_number_pieces[2]) == 0 and \
                     branch_name not in repo_branches:
-                git.checkout_master(repo, pull=True)
+                git.checkout_default_branch(repo, pull=True)
                 git.create_branch(branch_name, version_number, repo, push=True)
-        # If a patch release log between 0.A.X..0.A.X-1
-        if int(version_number_pieces[2]) > 0:
-            old_version_string = '%s.%s.%s' % (
-                version_number_pieces[0],
-                version_number_pieces[1],
-                int(version_number_pieces[2]) - 1)
-            log_string = '%s...%s' % (
-                version_number,
-                old_version_string)
-        # If a minor release log between 0.X.0..0.X-1.0
-        else:
-            old_version_string = '%s.%s.%s' % (
-                version_number_pieces[0],
-                int(version_number_pieces[1]) - 1,
-                0)
-            log_string = '%s...%s' % (
-                version_number,
-                old_version_string)
 
-        categories = repo.get_local_config().get(
-            'categories', config.default_changelog_categories)
-        create_github_release(repo, log_string, version_number,
-                              categories)
-        git.checkout_master(repo, pull=True)
+    def _changelog_process():
+        with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
+            git.checkout_default_branch(repo, pull=True)
+            log_string = _get_log_string(version_number_pieces)
+            categories = repo.get_local_config().get(
+                'categories', config.default_changelog_categories)
+            create_github_release(repo, log_string, version_number,
+                                  categories)
+            git.checkout_default_branch(repo, pull=True)
 
-    with fasteners.InterProcessLock(os.path.join(lock_dir, meta_repo.name)):
-        bump_meta(meta_repo, repo, version_number)
-        git.checkout_master(meta_repo, pull=True)
+    multiprocessing.Process(target=_changelog_process).start()
+
+    def _meta_process():
+        with fasteners.InterProcessLock(os.path.join(lock_dir,
+                                                     meta_repo.name)):
+            bump_meta(meta_repo, repo, version_number)
+            git.checkout_default_branch(meta_repo, pull=True)
+
+    # Only bump the metapackage for tracked/required packages optional extra
+    # versions are not pinned
+    if not repo.repo_config.get('optional_package'):
+        multiprocessing.Process(target=_meta_process).start()

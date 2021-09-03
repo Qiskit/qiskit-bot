@@ -35,6 +35,7 @@ class TestConfig(unittest.TestCase):
         config_text = """
         api_key: 1234567abc
         github_webhook_secret: 12345abc
+        meta_repo: foo
         """
         mock_open = unittest.mock.mock_open(read_data=config_text)
         with unittest.mock.patch('qiskit_bot.config.open', mock_open):
@@ -45,6 +46,7 @@ class TestConfig(unittest.TestCase):
         config_text = """
         api_key: 1234567abc
         working_dir: /tmp
+        meta_repo: Qiskit/qiskit
         repos:
           - name: qiskit/Qiskit-terra
         """
@@ -60,6 +62,7 @@ class TestConfig(unittest.TestCase):
         config_text = """
         api_key: 1234567abc
         github_webhook_secret: 12345abc
+        meta_repo: mtreinish/qiskit-sandbox
         repos:
         """
         mock_open = unittest.mock.mock_open(read_data=config_text)
@@ -71,6 +74,7 @@ class TestConfig(unittest.TestCase):
         config_text = """
         api_key: 1234567abc
         github_webhook_secret: 12345abc
+        meta_repo: mtreinish/qiskit-sandbox
         repos:
           - qiskit/qiskit-terra
           - qiskit/qiskit-ignis

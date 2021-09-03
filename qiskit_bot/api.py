@@ -57,6 +57,12 @@ def setup():
     global WEBHOOK
     if not CONFIG:
         CONFIG = config.load_config('/etc/qiskit_bot.yaml')
+    log_level = CONFIG.get('log_level', 'INFO')
+    default_log_format = ('%(asctime)s: %(process)d %(levelname)s '
+                          '%(name)s [-] %(message)s')
+    log_format = CONFIG.get('log_format', default_log_format)
+
+    logging.basicConfig(level=log_level, format=log_format)
     if not os.path.isdir(CONFIG['working_dir']):
         os.mkdir(CONFIG['working_dir'])
     if not os.path.isdir(os.path.join(CONFIG['working_dir'], 'lock')):
@@ -65,7 +71,7 @@ def setup():
 
         with fasteners.InterProcessLock(
                 os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
-                             repo.name)):
+                             repo['name'])):
             REPOS[repo['name']] = repos.Repo(CONFIG['working_dir'],
                                              repo['name'],
                                              CONFIG['api_key'],
@@ -73,9 +79,10 @@ def setup():
     # Load the meta repo
     with fasteners.InterProcessLock(
             os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
-                         META_REPO.name)):
+                         CONFIG['meta_repo'])):
+        repo_config = {'default_branch': CONFIG['meta_repo_default_branch']}
         META_REPO = repos.Repo(CONFIG['working_dir'], CONFIG['meta_repo'],
-                               CONFIG['api_key'])
+                               CONFIG['api_key'], repo_config=repo_config)
     # NOTE(mtreinish): This is a workaround until there is a supported method
     # to set a secret post-init. See:
     # https://github.com/bloomberg/python-github-webhook/pull/19
@@ -147,7 +154,7 @@ def on_pull_event(data):
                     META_REPO.gh_repo.get_git_ref(
                         "heads/" 'bump_meta').delete()
                     # Delete local branch
-                    git.checkout_master(META_REPO)
+                    git.checkout_default_branch(META_REPO)
                     git.delete_local_branch('bump_meta', META_REPO)
 
     elif data['action'] in ['opened', 'assigned', 'unassigned',
@@ -169,7 +176,7 @@ def main():
     """Run APP."""
     global CONFIG
     CONFIG = config.load_config(sys.argv[1])
-    log_format = ('%(asctime)s.%(msecs)03d %(process)d %(levelname)s '
+    log_format = ('%(asctime)s %(process)d %(levelname)s '
                   '%(name)s [-] %(message)s')
     logging.basicConfig(level=logging.DEBUG, format=log_format)
     APP.run(debug=True, host='0.0.0.0', port=8281)

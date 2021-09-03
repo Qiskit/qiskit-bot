@@ -6,10 +6,26 @@ various aspect of managing the repositories in the qiskit github organization.
 For example, release automation to automatically generate a github release with
 a full changelog from just a git tag and then generate a PR to bump the
 meta-repository based on that tag. The goal of this project is to minimize the
-number of manual actions needed as part of daily maintanence of qiskit.
+number of manual actions needed as part of daily maintenance of qiskit.
+
+As of right now the bot concentrates on release process automation. It handles
+3 key aspects of that. First it generates release notes based on the git log
+and pull request tags. This generated changelog is added to the github releases
+page. The next step is branch creation. If a project is configured to branch
+on minor releases the bot will automatically create the branch. The last step
+is bumping the meta repository to include the new version of the released
+element. This will handle increasing the meta-package version, the requirements
+version of the element, the docs version, and regenerating the authors list
+and bibtex file. All 3 of these steps are triggered by tag creation. This
+means with the bot all that is required for a qiskit project maintainer is to
+push a git tag to github. When coupled with pypi artifact (wheel and sdist)
+CI jobs pushing a tag becomes the only required manual step to push a release
+everything else will now be done automatically.
+
+In the future the bot may be expanded to automate additional aspects of
+the github workflow for the qiskit community.
 
 ## Configuration
-
 
 ### Github side configuration
 

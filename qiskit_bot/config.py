@@ -28,17 +28,23 @@ default_changelog_categories = {
     'Changelog: API Change': 'Changed',
     'Changelog: Removal': 'Removed',
     'Changelog: Bugfix': 'Fixed',
+    'Changelog: None': None,
 }
 
 
 schema = vol.Schema({
     vol.Required('api_key'): str,
     vol.Required('working_dir'): str,
-    vol.Optional('meta_repo', default='Qiskit/qiskit'): str,
+    vol.Required('meta_repo'): str,
+    vol.Optional('meta_repo_default_branch', default='master'): str,
     vol.Optional('github_webhook_secret'): str,
+    vol.Optional('log_level', default='INFO'): str,
+    vol.Optional('log_format'): str,
     vol.Required('repos'): vol.All([{
         vol.Required('name'): str,
+        vol.Optional('default_branch', default='master'): str,
         vol.Optional('branch_on_release', default=False): bool,
+        vol.Optional('optional_package', default=False): bool,
     }]),
 })
 

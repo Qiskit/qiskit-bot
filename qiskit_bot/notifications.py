@@ -50,15 +50,15 @@ def trigger_notifications(pr_number, repo, conf):
         if notify_list:
             default_prelude = """Thank you for opening a new pull request.
 
-Before your PR can be merged it will first need to run and passe continuous
+Before your PR can be merged it will first need to run and pass continuous
 integration tests and be also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
 PRs. While only a subset of people are authorized to approval pull requests for
-merging everyone is encouraged to review open pull requests. Doing reviews helps
-reduce the burden on the core team and helps make the project's code better for
-everyone.
+merging everyone is encouraged to review open pull requests. Doing reviews
+helps reduce the burden on the core team and helps make the project's code
+better for everyone.
 
 One or more of the the following people are requested to review this:\n
 """

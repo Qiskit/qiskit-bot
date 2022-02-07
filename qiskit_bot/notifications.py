@@ -56,7 +56,9 @@ be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
 PRs. While only a subset of people are authorized to approval pull requests for
-merging
+merging everyone is encouraged to review open pull requests. Doing reviews helps
+reduce the burden on the core team and helps make the project's code better for
+everyone.
 
 One or more of the the following people are requested to review this:\n
 """

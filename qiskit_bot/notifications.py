@@ -41,7 +41,7 @@ def trigger_notifications(pr_number, repo, conf):
         }
         pr = repo.gh_repo.get_pull(pr_number)
         file_list = pr.get_files()
-        filenames = [file.file_name for file in file_list]
+        filenames = [file.filename for file in file_list]
         for path_regex, user_list in notification_regex.items():
             for file_name in filenames:
                 if path_regex.search(file_name):

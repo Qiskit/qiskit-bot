@@ -22,7 +22,7 @@ from qiskit_bot import notifications
 class FakeFile:
     """Fake file for get_files() return."""
     def __init__(self, filename):
-        self.file_name = filename
+        self.filename = filename
 
 
 class TestReleaseProcess(fixtures.TestWithFixtures, unittest.TestCase):

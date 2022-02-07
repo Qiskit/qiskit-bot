@@ -46,6 +46,7 @@ class TestReleaseProcess(fixtures.TestWithFixtures, unittest.TestCase):
         ]
         gh_mock = unittest.mock.MagicMock()
         gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
         repo.local_config = local_config
         repo.get_local_config = unittest.mock.MagicMock(
             return_value=local_config
@@ -92,6 +93,7 @@ One or more of the the following people are requested to review this:
         ]
         gh_mock = unittest.mock.MagicMock()
         gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
         repo.local_config = local_config
         repo.get_local_config = unittest.mock.MagicMock(
             return_value=local_config
@@ -139,6 +141,7 @@ One or more of the the following people are requested to review this:
         ]
         gh_mock = unittest.mock.MagicMock()
         gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
         repo.local_config = local_config
         repo.get_local_config = unittest.mock.MagicMock(
             return_value=local_config
@@ -169,6 +172,7 @@ One or more of the the following people are requested to review this:
         ]
         gh_mock = unittest.mock.MagicMock()
         gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
         repo.local_config = local_config
         repo.get_local_config = unittest.mock.MagicMock(
             return_value=local_config

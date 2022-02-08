@@ -169,3 +169,49 @@ class TestLocalConfig(unittest.TestCase):
             'notifications': {},
         }
         self.assertEqual(result, expected)
+
+    def test_readme_example(self):
+        config_text = """---
+        categories:
+            "Changelog: Custom": Special category
+            "Changelog: Custom 2": Less special category
+            "Nothing": null
+        notifications:
+            ".*":
+                - "@core-team"
+            qiskit/transpiler:
+                - "@user1"
+                - "@user2"
+            qiskit/transpiler/passes:
+                - "@user3"
+                - "@user4"
+        always_notify: true
+        notification_prelude: |
+            This is a custom prelude
+
+            I include whitespace:
+
+        """
+        mock_open = unittest.mock.mock_open(read_data=config_text)
+        repo = unittest.mock.MagicMock()
+        repo.local_path = '/tmp/fake'
+        with unittest.mock.patch('qiskit_bot.config.open', mock_open):
+            with unittest.mock.patch('os.path.isfile', return_value=True):
+                result = config.load_repo_config(repo)
+        expected = {
+            'categories': {
+                'Changelog: Custom': 'Special category',
+                "Changelog: Custom 2": 'Less special category',
+                "Nothing": None,
+            },
+            'notifications': {
+                '.*': ['@core-team'],
+                'qiskit/transpiler': ['@user1', '@user2'],
+                'qiskit/transpiler/passes': ['@user3', '@user4']
+            },
+            'notification_prelude': (
+                'This is a custom prelude\n\nI include whitespace:\n'
+            ),
+            'always_notify': True,
+        }
+        self.assertEqual(result, expected)

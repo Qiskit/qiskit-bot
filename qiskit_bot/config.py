@@ -65,6 +65,7 @@ local_config_schema = vol.Schema({
     vol.Optional('categories', default=default_changelog_categories): dict,
     vol.Optional('notifications'): {vol.Extra: [str]},
     vol.Optional('notification_prelude'): str,
+    vol.Optional('always_notify'): bool,
 })
 
 

@@ -25,7 +25,7 @@ class FakeFile:
         self.filename = filename
 
 
-class TestReleaseProcess(fixtures.TestWithFixtures, unittest.TestCase):
+class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = fixtures.TempDir()
@@ -65,17 +65,15 @@ integration tests and be also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
-PRs. While only a subset of people are authorized to approval pull requests for
+PRs. While only a subset of people are authorized to approve pull requests for
 merging everyone is encouraged to review open pull requests. Doing reviews
-helps educe the burden on the core team and helps make the project's code
+helps reduce the burden on the core team and helps make the project's code
 better for everyone.
 
 One or more of the the following people are requested to review this:
-
 - @user1
 - @user2
 """
-
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 
@@ -114,13 +112,12 @@ integration tests and be also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
-PRs. While only a subset of people are authorized to approval pull requests for
+PRs. While only a subset of people are authorized to approve pull requests for
 merging everyone is encouraged to review open pull requests. Doing reviews
 helps reduce the burden on the core team and helps make the project's code
 better for everyone.
 
 One or more of the the following people are requested to review this:
-
 - @user1
 - @user2
 - @user3
@@ -195,13 +192,169 @@ integration tests and be also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
-PRs. While only a subset of people are authorized to approval pull requests for
+PRs. While only a subset of people are authorized to approve pull requests for
 merging everyone is encouraged to review open pull requests. Doing reviews
 helps reduce the burden on the core team and helps make the project's code
 better for everyone.
 
 One or more of the the following people are requested to review this:
+- @user1
+- @user2
+"""
+        gh_mock.get_pull.assert_called_once_with(1234)
+        pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 
+    @unittest.mock.patch("multiprocessing.Process")
+    def test_no_match_always_notify(self, sub_mock):
+        repo = unittest.mock.MagicMock()
+        local_config = {
+            "notifications": {
+                ".*py": ["@user1", "@user2"],
+                ".*txt": ["@user2", "@user3"],
+            },
+            'always_notify': True,
+        }
+        pr_mock = unittest.mock.MagicMock()
+        pr_mock.get_files.return_value = [
+            FakeFile('file1.rs'),
+            FakeFile('file2.js'),
+        ]
+        gh_mock = unittest.mock.MagicMock()
+        gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
+        repo.local_config = local_config
+        repo.get_local_config = unittest.mock.MagicMock(
+            return_value=local_config
+        )
+        repo.gh_repo = gh_mock
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch('qiskit_bot.git.checkout_default_branch'):
+            notifications.trigger_notifications(1234, repo, conf)
+        sub_mock.assert_called_once()
+        inner_func = sub_mock.call_args_list[0][1]['target']
+        inner_func()
+        expected_body = """Thank you for opening a new pull request.
+
+Before your PR can be merged it will first need to run and pass continuous
+integration tests and be also be reviewed. Sometimes the review process can
+be slow, so please be patient.
+
+While you're waiting on CI and for review please feel free to review other open
+PRs. While only a subset of people are authorized to approve pull requests for
+merging everyone is encouraged to review open pull requests. Doing reviews
+helps reduce the burden on the core team and helps make the project's code
+better for everyone.
+"""
+        gh_mock.get_pull.assert_called_once_with(1234)
+        pr_mock.create_issue_comment.assert_called_once_with(expected_body)
+
+    @unittest.mock.patch("multiprocessing.Process")
+    def test_no_match_always_notify_custom_prelude(self, sub_mock):
+        repo = unittest.mock.MagicMock()
+        local_config = {
+            "notifications": {
+                ".*py": ["@user1", "@user2"],
+                ".*txt": ["@user2", "@user3"],
+            },
+            'always_notify': True,
+            'notification_prelude': "This is my prelude\n"
+        }
+        pr_mock = unittest.mock.MagicMock()
+        pr_mock.get_files.return_value = [
+            FakeFile('file1.rs'),
+            FakeFile('file2.js'),
+        ]
+        gh_mock = unittest.mock.MagicMock()
+        gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
+        repo.local_config = local_config
+        repo.get_local_config = unittest.mock.MagicMock(
+            return_value=local_config
+        )
+        repo.gh_repo = gh_mock
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch('qiskit_bot.git.checkout_default_branch'):
+            notifications.trigger_notifications(1234, repo, conf)
+        sub_mock.assert_called_once()
+        inner_func = sub_mock.call_args_list[0][1]['target']
+        inner_func()
+        expected_body = "This is my prelude\n"
+        gh_mock.get_pull.assert_called_once_with(1234)
+        pr_mock.create_issue_comment.assert_called_once_with(expected_body)
+
+    @unittest.mock.patch("multiprocessing.Process")
+    def test_always_notify_no_notification(self, sub_mock):
+        repo = unittest.mock.MagicMock()
+        local_config = {
+            'always_notify': True,
+        }
+        pr_mock = unittest.mock.MagicMock()
+        pr_mock.get_files.return_value = [
+            FakeFile('file1.rs'),
+            FakeFile('file2.js'),
+        ]
+        gh_mock = unittest.mock.MagicMock()
+        gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
+        repo.local_config = local_config
+        repo.get_local_config = unittest.mock.MagicMock(
+            return_value=local_config
+        )
+        repo.gh_repo = gh_mock
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch('qiskit_bot.git.checkout_default_branch'):
+            notifications.trigger_notifications(1234, repo, conf)
+        sub_mock.assert_called_once()
+        inner_func = sub_mock.call_args_list[0][1]['target']
+        inner_func()
+        expected_body = """Thank you for opening a new pull request.
+
+Before your PR can be merged it will first need to run and pass continuous
+integration tests and be also be reviewed. Sometimes the review process can
+be slow, so please be patient.
+
+While you're waiting on CI and for review please feel free to review other open
+PRs. While only a subset of people are authorized to approve pull requests for
+merging everyone is encouraged to review open pull requests. Doing reviews
+helps reduce the burden on the core team and helps make the project's code
+better for everyone.
+"""
+        gh_mock.get_pull.assert_called_once_with(1234)
+        pr_mock.create_issue_comment.assert_called_once_with(expected_body)
+
+    @unittest.mock.patch("multiprocessing.Process")
+    def test_match_custom_prelude(self, sub_mock):
+        repo = unittest.mock.MagicMock()
+        local_config = {
+            "notifications": {
+                ".*py": ["@user1", "@user2"],
+                ".*txt": ["@user2", "@user3"],
+            },
+            'always_notify': True,
+            'notification_prelude': "This is my prelude\n"
+        }
+        pr_mock = unittest.mock.MagicMock()
+        pr_mock.get_files.return_value = [
+            FakeFile('file1.rs'),
+            FakeFile('file2.py'),
+        ]
+        gh_mock = unittest.mock.MagicMock()
+        gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
+        repo.local_config = local_config
+        repo.get_local_config = unittest.mock.MagicMock(
+            return_value=local_config
+        )
+        repo.gh_repo = gh_mock
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch('qiskit_bot.git.checkout_default_branch'):
+            notifications.trigger_notifications(1234, repo, conf)
+        sub_mock.assert_called_once()
+        inner_func = sub_mock.call_args_list[0][1]['target']
+        inner_func()
+        expected_body = """This is my prelude
+
+One or more of the the following people are requested to review this:
 - @user1
 - @user2
 """

@@ -132,6 +132,7 @@ class TestLocalConfig(unittest.TestCase):
             path_2:
                 - "@user3"
                 - "@user2"
+        always_notify: true
         notification_prelude: |
             This is a custom prelude
 
@@ -153,7 +154,8 @@ class TestLocalConfig(unittest.TestCase):
             },
             'notification_prelude': (
                 'This is a custom prelude\n\nI include whitespace:\n'
-            )
+            ),
+            'always_notify': True,
         }
         self.assertEqual(result, expected)
 

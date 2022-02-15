@@ -61,7 +61,7 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         expected_body = """Thank you for opening a new pull request.
 
 Before your PR can be merged it will first need to run and pass continuous
-integration tests and be also be reviewed. Sometimes the review process can
+integration tests and also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
@@ -108,7 +108,7 @@ One or more of the the following people are requested to review this:
         expected_body = """Thank you for opening a new pull request.
 
 Before your PR can be merged it will first need to run and pass continuous
-integration tests and be also be reviewed. Sometimes the review process can
+integration tests and also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
@@ -188,7 +188,7 @@ One or more of the the following people are requested to review this:
         expected_body = """Thank you for opening a new pull request.
 
 Before your PR can be merged it will first need to run and pass continuous
-integration tests and be also be reviewed. Sometimes the review process can
+integration tests and also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
@@ -236,7 +236,7 @@ One or more of the the following people are requested to review this:
         expected_body = """Thank you for opening a new pull request.
 
 Before your PR can be merged it will first need to run and pass continuous
-integration tests and be also be reviewed. Sometimes the review process can
+integration tests and also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open
@@ -310,7 +310,7 @@ better for everyone.
         expected_body = """Thank you for opening a new pull request.
 
 Before your PR can be merged it will first need to run and pass continuous
-integration tests and be also be reviewed. Sometimes the review process can
+integration tests and also be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
 While you're waiting on CI and for review please feel free to review other open

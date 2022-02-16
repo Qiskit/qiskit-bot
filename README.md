@@ -22,7 +22,7 @@ push a git tag to github. When coupled with pypi artifact (wheel and sdist)
 CI jobs pushing a tag becomes the only required manual step to push a release
 everything else will now be done automatically.
 
-The othe main feature the bot offers is to automatically leave a message on
+The other main feature the bot offers is to automatically leave a message on
 all new PRs when they are opened. This can be useful to leave a comment to set
 expectations for contributors but also be used to notify particular people to
 review the PR. The bot is configurable for each project so that subsets of
@@ -59,10 +59,10 @@ qiskit-bot gives projects some local configuration options that can be set in
 the repository. To set a local configuration file a file `qiskit_bot.yaml` must
 be created in the root of the git repository. If this file is present then
 qiskit-bot will read it before every action and adjust behavior based on it's
-contents. Currently this configuration file is used to control two things,
-the changelog generation behavior and whether the bot will leave comments
+contents. Currently this configuration file is used to control two things:
+the changelog generation behavior, and whether the bot will leave comments
 on new pull requests when they're opened (and the exact behavior of that
-comment). n example of a fully populated configuration file is:
+comment). An example of a fully populated configuration file is:
 
 ```yaml
 ---

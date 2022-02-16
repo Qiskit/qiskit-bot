@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 def trigger_notifications(pr_number, repo, conf):
-    """Do the post tag release processes."""
+    """Process any potential notifications on a new PR."""
     working_dir = conf.get('working_dir')
     lock_dir = os.path.join(working_dir, 'lock')
 
@@ -55,13 +55,13 @@ def trigger_notifications(pr_number, repo, conf):
         if notify_list or always_notify:
             default_prelude = """Thank you for opening a new pull request.
 
-Before your PR can be merged it will first need to run and pass continuous
-integration tests and also be reviewed. Sometimes the review process can
+Before your PR can be merged it will first need to pass continuous
+integration tests and be reviewed. Sometimes the review process can
 be slow, so please be patient.
 
-While you're waiting on CI and for review please feel free to review other open
+While you're waiting, please feel free to review other open
 PRs. While only a subset of people are authorized to approve pull requests for
-merging everyone is encouraged to review open pull requests. Doing reviews
+merging, everyone is encouraged to review open pull requests. Doing reviews
 helps reduce the burden on the core team and helps make the project's code
 better for everyone.
 """

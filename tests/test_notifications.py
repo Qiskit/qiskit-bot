@@ -58,22 +58,10 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         sub_mock.assert_called_once()
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
-        expected_body = """Thank you for opening a new pull request.
-
-Before your PR can be merged it will first need to pass continuous
-integration tests and be reviewed. Sometimes the review process can
-be slow, so please be patient.
-
-While you're waiting, please feel free to review other open
-PRs. While only a subset of people are authorized to approve pull requests for
-merging, everyone is encouraged to review open pull requests. Doing reviews
-helps reduce the burden on the core team and helps make the project's code
-better for everyone.
-
-One or more of the the following people are requested to review this:
-- @user1
-- @user2
-"""
+        expected_body = notifications.DEFAULT_PRELUDE + (
+            "\nOne or more of the the following people are requested to "
+            "review this:\n- @user1\n- @user2\n"
+        )
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 
@@ -105,23 +93,10 @@ One or more of the the following people are requested to review this:
         sub_mock.assert_called_once()
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
-        expected_body = """Thank you for opening a new pull request.
-
-Before your PR can be merged it will first need to pass continuous
-integration tests and be reviewed. Sometimes the review process can
-be slow, so please be patient.
-
-While you're waiting, please feel free to review other open
-PRs. While only a subset of people are authorized to approve pull requests for
-merging, everyone is encouraged to review open pull requests. Doing reviews
-helps reduce the burden on the core team and helps make the project's code
-better for everyone.
-
-One or more of the the following people are requested to review this:
-- @user1
-- @user2
-- @user3
-"""
+        expected_body = notifications.DEFAULT_PRELUDE + (
+            "\nOne or more of the the following people are requested to "
+            "review this:\n- @user1\n- @user2\n- @user3\n"
+        )
 
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
@@ -185,22 +160,10 @@ One or more of the the following people are requested to review this:
         sub_mock.assert_called_once()
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
-        expected_body = """Thank you for opening a new pull request.
-
-Before your PR can be merged it will first need to pass continuous
-integration tests and be reviewed. Sometimes the review process can
-be slow, so please be patient.
-
-While you're waiting, please feel free to review other open
-PRs. While only a subset of people are authorized to approve pull requests for
-merging, everyone is encouraged to review open pull requests. Doing reviews
-helps reduce the burden on the core team and helps make the project's code
-better for everyone.
-
-One or more of the the following people are requested to review this:
-- @user1
-- @user2
-"""
+        expected_body = notifications.DEFAULT_PRELUDE + (
+            "\nOne or more of the the following people are requested to "
+            "review this:\n- @user1\n- @user2\n"
+        )
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 
@@ -233,18 +196,7 @@ One or more of the the following people are requested to review this:
         sub_mock.assert_called_once()
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
-        expected_body = """Thank you for opening a new pull request.
-
-Before your PR can be merged it will first need to pass continuous
-integration tests and be reviewed. Sometimes the review process can
-be slow, so please be patient.
-
-While you're waiting, please feel free to review other open
-PRs. While only a subset of people are authorized to approve pull requests for
-merging, everyone is encouraged to review open pull requests. Doing reviews
-helps reduce the burden on the core team and helps make the project's code
-better for everyone.
-"""
+        expected_body = notifications.DEFAULT_PRELUDE
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 
@@ -307,18 +259,7 @@ better for everyone.
         sub_mock.assert_called_once()
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
-        expected_body = """Thank you for opening a new pull request.
-
-Before your PR can be merged it will first need to pass continuous
-integration tests and be reviewed. Sometimes the review process can
-be slow, so please be patient.
-
-While you're waiting, please feel free to review other open
-PRs. While only a subset of people are authorized to approve pull requests for
-merging, everyone is encouraged to review open pull requests. Doing reviews
-helps reduce the burden on the core team and helps make the project's code
-better for everyone.
-"""
+        expected_body = notifications.DEFAULT_PRELUDE
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 

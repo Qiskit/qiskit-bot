@@ -24,6 +24,23 @@ from qiskit_bot import git
 
 LOG = logging.getLogger(__name__)
 
+with io.StringIO() as buf:
+    buf.write("Thank you for opening a new pull request.\n\n")
+    buf.write(
+        "Before your PR can be merged it will first need to pass "
+        "continuous integration tests and be reviewed. Sometimes "
+        "the review process can be slow, so please be patient.\n\n"
+    )
+    buf.write(
+        "While you're waiting, please feel free to review other "
+        "open PRs. While only a subset of people are authorized "
+        "to approve pull requests for merging, everyone is "
+        "encouraged to review open pull requests. Doing reviews "
+        "helps reduce the burden on the core team and helps make "
+        "the project's code better for everyone.\n"
+    )
+    DEFAULT_PRELUDE = buf.getvalue()
+
 
 def trigger_notifications(pr_number, repo, conf):
     """Process any potential notifications on a new PR."""
@@ -53,19 +70,7 @@ def trigger_notifications(pr_number, repo, conf):
                     for user in user_list:
                         notify_list.add(user)
         if notify_list or always_notify:
-            default_prelude = """Thank you for opening a new pull request.
-
-Before your PR can be merged it will first need to pass continuous
-integration tests and be reviewed. Sometimes the review process can
-be slow, so please be patient.
-
-While you're waiting, please feel free to review other open
-PRs. While only a subset of people are authorized to approve pull requests for
-merging, everyone is encouraged to review open pull requests. Doing reviews
-helps reduce the burden on the core team and helps make the project's code
-better for everyone.
-"""
-            prelude = local_config.get("notification_prelude", default_prelude)
+            prelude = local_config.get("notification_prelude", DEFAULT_PRELUDE)
             with io.StringIO() as buf:
                 buf.write(prelude)
                 if notify_list:

@@ -58,7 +58,7 @@ to the `/postreceive` endpoint off of the server's address and that the
 qiskit-bot gives projects some local configuration options that can be set in
 the repository. To set a local configuration file a file `qiskit_bot.yaml` must
 be created in the root of the git repository. If this file is present then
-qiskit-bot will read it before every action and adjust behavior based on it's
+qiskit-bot will read it before every action and adjust behavior based on its
 contents. Currently this configuration file is used to control two things:
 the changelog generation behavior, and whether the bot will leave comments
 on new pull requests when they're opened (and the exact behavior of that

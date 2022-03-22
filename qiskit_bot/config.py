@@ -62,21 +62,26 @@ def load_config(path):
 
 
 local_config_schema = vol.Schema({
-    'users': [{}],
-    'categories': vol.Optional({}),
+    vol.Optional('categories', default=default_changelog_categories): dict,
+    vol.Optional('notifications'): {vol.Extra: [str]},
+    vol.Optional('notification_prelude'): str,
+    vol.Optional('always_notify'): bool,
 })
 
 
 def load_repo_config(repo):
     config_path = os.path.join(repo.local_path, 'qiskit_bot.yaml')
     if not os.path.isfile(config_path):
-        return {'users': [], 'categories': default_changelog_categories}
+        return {
+            'categories': default_changelog_categories,
+            'notifications': {}
+        }
     with open(config_path, 'r') as fd:
         raw_config = yaml.safe_load(fd.read())
     try:
         local_config_schema(raw_config)
     except vol.MultipleInvalid:
         LOG.exception('Invalid local repo config for %s' % repo.repo_name)
-        return None
+        return {}
     LOG.info('Loaded local repo config for %s' % repo.repo_name)
     return raw_config

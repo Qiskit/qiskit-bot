@@ -23,6 +23,7 @@ import github_webhook
 
 from qiskit_bot import config
 from qiskit_bot import git
+from qiskit_bot import notifications
 from qiskit_bot import release_process
 from qiskit_bot import repos
 
@@ -145,6 +146,12 @@ def on_pull_event(data):
                     # Delete local branch
                     git.checkout_default_branch(META_REPO)
                     git.delete_local_branch('bump_meta', META_REPO)
+    if data['action'] == 'opened':
+        repo_name = data['repository']['full_name']
+        pr_number = data['pull_request']['number']
+        if repo_name in REPOS:
+            notifications.trigger_notifications(pr_number,
+                                                REPOS[repo_name], CONFIG)
 
 
 @WEBHOOK.hook(event_type='pull_request_review')

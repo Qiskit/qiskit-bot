@@ -83,3 +83,135 @@ class TestConfig(unittest.TestCase):
         with unittest.mock.patch('qiskit_bot.config.open', mock_open):
             self.assertRaises(vol.MultipleInvalid, config.load_config,
                               'fake_path')
+
+
+class TestLocalConfig(unittest.TestCase):
+
+    def test_load_config_empty(self):
+        mock_open = unittest.mock.mock_open(read_data='')
+        repo = unittest.mock.MagicMock()
+        repo.local_path = '/tmp/fake'
+        with unittest.mock.patch('qiskit_bot.config.open', mock_open):
+            with unittest.mock.patch('os.path.isfile', return_value=True):
+                result = config.load_repo_config(repo)
+        expected = {}
+        self.assertEqual(result, expected)
+
+    def test_load_config_notifications(self):
+        config_text = """---
+        notifications:
+            path_1:
+                - "@user1"
+                - "@user2"
+            path_2:
+                - "@user3"
+                - "@user2"
+        """
+        mock_open = unittest.mock.mock_open(read_data=config_text)
+        repo = unittest.mock.MagicMock()
+        repo.local_path = '/tmp/fake'
+        with unittest.mock.patch('qiskit_bot.config.open', mock_open):
+            with unittest.mock.patch('os.path.isfile', return_value=True):
+                result = config.load_repo_config(repo)
+        expected = {
+            'notifications': {
+                'path_1': ['@user1', '@user2'],
+                'path_2': ['@user3', '@user2']
+            },
+        }
+        self.assertEqual(result, expected)
+
+    def test_load_config_full_config(self):
+        config_text = """---
+        categories:
+            "Changelog: Custom": Special category
+        notifications:
+            path_1:
+                - "@user1"
+                - "@user2"
+            path_2:
+                - "@user3"
+                - "@user2"
+        always_notify: true
+        notification_prelude: |
+            This is a custom prelude
+
+            I include whitespace:
+        """
+        mock_open = unittest.mock.mock_open(read_data=config_text)
+        repo = unittest.mock.MagicMock()
+        repo.local_path = '/tmp/fake'
+        with unittest.mock.patch('qiskit_bot.config.open', mock_open):
+            with unittest.mock.patch('os.path.isfile', return_value=True):
+                result = config.load_repo_config(repo)
+        expected = {
+            'categories': {
+                'Changelog: Custom': 'Special category',
+            },
+            'notifications': {
+                'path_1': ['@user1', '@user2'],
+                'path_2': ['@user3', '@user2']
+            },
+            'notification_prelude': (
+                'This is a custom prelude\n\nI include whitespace:\n'
+            ),
+            'always_notify': True,
+        }
+        self.assertEqual(result, expected)
+
+    def test_invalid_file(self):
+        repo = unittest.mock.MagicMock()
+        repo.local_path = '/tmp/fake'
+        with unittest.mock.patch('os.path.isfile', return_value=False):
+            result = config.load_repo_config(repo)
+        expected = {
+            'categories': config.default_changelog_categories,
+            'notifications': {},
+        }
+        self.assertEqual(result, expected)
+
+    def test_readme_example(self):
+        config_text = """---
+        categories:
+            "Changelog: Custom": Special category
+            "Changelog: Custom 2": Less special category
+            "Nothing": null
+        notifications:
+            ".*":
+                - "@core-team"
+            qiskit/transpiler:
+                - "@user1"
+                - "@user2"
+            qiskit/transpiler/passes:
+                - "@user3"
+                - "@user4"
+        always_notify: true
+        notification_prelude: |
+            This is a custom prelude
+
+            I include whitespace:
+
+        """
+        mock_open = unittest.mock.mock_open(read_data=config_text)
+        repo = unittest.mock.MagicMock()
+        repo.local_path = '/tmp/fake'
+        with unittest.mock.patch('qiskit_bot.config.open', mock_open):
+            with unittest.mock.patch('os.path.isfile', return_value=True):
+                result = config.load_repo_config(repo)
+        expected = {
+            'categories': {
+                'Changelog: Custom': 'Special category',
+                "Changelog: Custom 2": 'Less special category',
+                "Nothing": None,
+            },
+            'notifications': {
+                '.*': ['@core-team'],
+                'qiskit/transpiler': ['@user1', '@user2'],
+                'qiskit/transpiler/passes': ['@user3', '@user4']
+            },
+            'notification_prelude': (
+                'This is a custom prelude\n\nI include whitespace:\n'
+            ),
+            'always_notify': True,
+        }
+        self.assertEqual(result, expected)

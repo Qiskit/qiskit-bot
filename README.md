@@ -22,6 +22,13 @@ push a git tag to github. When coupled with pypi artifact (wheel and sdist)
 CI jobs pushing a tag becomes the only required manual step to push a release
 everything else will now be done automatically.
 
+The other main feature the bot offers is to automatically leave a message on
+all new PRs when they are opened. This can be useful to leave a comment to set
+expectations for contributors but also be used to notify particular people to
+review the PR. The bot is configurable for each project so that subsets of
+github users can be mentioned in this comment automatically based on the files
+changed in the PR.
+
 In the future the bot may be expanded to automate additional aspects of
 the github workflow for the qiskit community.
 
@@ -44,3 +51,93 @@ the webhook to send all necessary event types to the endpoint where the bot
 is running. Two things to remember is that make sure you send the webhook events
 to the `/postreceive` endpoint off of the server's address and that the
 `Content type` is set to `application/json`.
+
+
+### Per repo configuration
+
+qiskit-bot gives projects some local configuration options that can be set in
+the repository. To set a local configuration file a file `qiskit_bot.yaml` must
+be created in the root of the git repository. If this file is present then
+qiskit-bot will read it before every action and adjust behavior based on its
+contents. Currently this configuration file is used to control two things:
+the changelog generation behavior, and whether the bot will leave comments
+on new pull requests when they're opened (and the exact behavior of that
+comment). An example of a fully populated configuration file is:
+
+```yaml
+---
+categories:
+    "Changelog: Custom": Special category
+    "Changelog: Custom 2": Less special category
+    "Nothing": null
+notifications:
+    ".*":
+        - "@core-team"
+    qiskit/transpiler:
+        - "@user1"
+        - "@user2"
+    qiskit/transpiler/passes:
+        - "@user3"
+        - "@user4"
+always_notify: true
+notification_prelude: |
+    This is a custom prelude
+
+    I include whitespace:
+
+```
+
+The details on each option are as follows:
+
+- `categories`: This contains a nested mapping of github labels to changelog
+  sections. If specified at release time when qiskit-bot generates the changelog
+  it will look at each merged PR in the release and if any have any matching
+  labels that commit summary message will be put under the corresponding
+  sections in the changelog used for the release page. If a value for any label
+  is set to `null` this means that this label is counted as matching but will
+  not be included in the generated changelog. By default any labels outside this
+  set will not be included in the changelog but when the
+  `tools/generate_changelog.py` script is run it flags any merged PRs for a pending
+  release that don't have a matching label. By setting one or more labels to `null`
+  these PRs will not show up in that script.
+
+  If this field is not specified the following default values are used:
+  ```yaml
+  "Changelog: Deprecation": Deprecated
+  "Changelog: New Feature": Added
+  "Changelog: API Change": Changed
+  "Changelog: Removal": Removed
+  "Changelog: Bugfix": Fixed
+  "Changelog: None": null
+  ```
+
+- `notifications`: This contains a mapping of path regexes to a list of usernames
+  to notify if an opened PR touches files that match a particular regex (as found
+  by Python's stdlib `re.search()` function). For example if you set the path regex
+  to `".*"` this would match everything, but using a regex gives you control over
+  exactly how and what matches a particular group. If a path matches the listed
+  usernames will be listed in the notification comment left by the bot on a new PR
+  being opened. This is an additive, so if there is more than 1 match the users
+  from all the matches will be listed in that comment. If this is not specified (and
+  `always_notify` is not set) then no comment will be left by the bot when new PRs
+  are opened.
+- `always_notify`: If this is specified a notification/comment is always left on PR
+  opening even if there are no matching notification paths. In the case of no
+  matching paths just the notification prelude is used.
+- `notification_prelude`: If this is specified the text used for this field will
+  be used as the beginning of every notification comment. If this is not specified
+  the following prelude is used:
+
+  ```
+  Thank you for opening a new pull request.
+
+  Before your PR can be merged it will first need to pass continuous
+  integration tests and be reviewed. Sometimes the review process can be slow,
+  so please be patient.
+
+  While you're waiting, please feel free to review other open PRs. While only a
+  subset of people are authorized to approve pull requests for merging,
+  everyone is encouraged to review open pull requests. Doing reviews helps
+  reduce the burden on the core team and helps make the project's code better
+  for everyone.
+  ```

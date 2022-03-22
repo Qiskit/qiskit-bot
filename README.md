@@ -131,13 +131,13 @@ The details on each option are as follows:
   ```
   Thank you for opening a new pull request.
 
-  Before your PR can be merged it will first need to run and pass continuous
-  integration tests and be also be reviewed. Sometimes the review process can
-  be slow, so please be patient.
+  Before your PR can be merged it will first need to pass continuous
+  integration tests and be reviewed. Sometimes the review process can be slow,
+  so please be patient.
 
-  While you're waiting on CI and for review please feel free to review other open
-  PRs. While only a subset of people are authorized to approve pull requests for
-  merging everyone is encouraged to review open pull requests. Doing reviews
-  helps reduce the burden on the core team and helps make the project's code
-  better for everyone.
+  While you're waiting, please feel free to review other open PRs. While only a
+  subset of people are authorized to approve pull requests for merging,
+  everyone is encouraged to review open pull requests. Doing reviews helps
+  reduce the burden on the core team and helps make the project's code better
+  for everyone.
   ```

@@ -21,6 +21,7 @@ import shutil
 import subprocess
 
 import fasteners
+import github
 
 from qiskit_bot import config
 from qiskit_bot import git
@@ -197,7 +198,13 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
         except ValueError:
             # Invalid PR number
             continue
-        labels = [x.name for x in repo.gh_repo.get_pull(pr_number).labels]
+        try:
+            labels = [x.name for x in repo.gh_repo.get_pull(pr_number).labels]
+        # If we have an issue querying github for labels this is likely a
+        # malformed commit summary line with an invalid PR number so just
+        # skip this commit
+        except github.GithubException:
+            continue
         label_found = False
         for label in labels:
             if label in changelog_dict:

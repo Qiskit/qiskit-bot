@@ -16,6 +16,7 @@ import os
 import unittest
 
 import fixtures
+from packaging.version import parse
 
 from qiskit_bot import config
 from qiskit_bot import release_process
@@ -851,36 +852,29 @@ qiskit-terra==0.16.0
         self.generate_mock.called_once_with(meta_repo)
 
     def test_get_log_string(self):
-        version_pieces = ['0', '10', '2']
+        version_obj = parse("0.10.2")
         self.assertEqual('0.10.2...0.10.1',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.10.2"))
-        version_pieces = ['0', '3', '0']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.3.0")
         self.assertEqual('0.3.0...0.2.0',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.3.0"))
-        version_pieces = ['0', '3', '25']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.3.25")
         self.assertEqual('0.3.25...0.3.24',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.3.25"))
-        version_pieces = ['0', '25', '0']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.25.0")
         self.assertEqual('0.25.0...0.24.0',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.25.0"))
+                         release_process._get_log_string(version_obj))
 
     def test_get_log_string_prerelease(self):
-        version_pieces = ['0', '25', '0']
+        version_obj = parse("0.25.0rc1")
         self.assertEqual('0.25.0rc1...0.24.0',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.25.0rc1"))
-        version_pieces = ['0', '25', '0']
-        self.assertEqual('0.25.0rc2...0.24.0',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.25.0rc2"))
-        version_pieces = ['0', '25', '0']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.25.0rc2")
+        self.assertEqual('0.25.0rc2...0.25.0rc1',
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.25.0b1")
         self.assertEqual('0.25.0b1...0.24.0',
-                         release_process._get_log_string(version_pieces,
-                                                         "0.25.0b1"))
+                         release_process._get_log_string(version_obj))
 
     @unittest.mock.patch.object(release_process, 'git')
     @unittest.mock.patch.object(release_process, 'create_github_release')
@@ -1784,7 +1778,7 @@ qiskit-terra==0.16.1
             release_process.finish_release('0.12.0rc2', repo, conf, meta_repo)
         bump_meta_mock.assert_not_called()
         github_release_mock.assert_called_once_with(
-            repo, '0.12.0rc2...0.11.0', '0.12.0rc2',
+            repo, '0.12.0rc2...0.12.0rc1', '0.12.0rc2',
             config.default_changelog_categories, True)
         git_mock.create_branch.assert_not_called()
 

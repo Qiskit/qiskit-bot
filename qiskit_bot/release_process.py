@@ -243,27 +243,23 @@ def create_github_release(repo, log_string, version_number, categories,
                                     prerelease=prerelease)
 
 
-def _get_log_string(version_number_pieces, version_string):
-    version_number = version_string
+def _get_log_string(version_obj):
+    # If a second prerelease show log from first
+    if version_obj.is_prerelease and version_obj.pre[1] > 1:
+        old_version = (
+            f"{version_obj.base_version}{version_obj.pre[0]}"
+            f"{version_obj.pre[1] - 1}"
+        )
     # If a patch release log between 0.A.X..0.A.X-1
-    if int(version_number_pieces[2]) > 0:
-        old_version_string = '%s.%s.%s' % (
-            version_number_pieces[0],
-            version_number_pieces[1],
-            int(version_number_pieces[2]) - 1)
-        log_string = '%s...%s' % (
-            version_number,
-            old_version_string)
+    elif version_obj.micro > 0:
+        old_version = (
+            f"{version_obj.epoch}.{version_obj.minor}."
+            f"{version_obj.micro - 1}"
+        )
     # If a minor release log between 0.X.0..0.X-1.0
     else:
-        old_version_string = '%s.%s.%s' % (
-            version_number_pieces[0],
-            int(version_number_pieces[1]) - 1,
-            0)
-        log_string = '%s...%s' % (
-            version_number,
-            old_version_string)
-    return log_string
+        old_version = f"{version_obj.epoch}.{version_obj.minor - 1}.0"
+    return f"{version_obj}...{old_version}"
 
 
 def finish_release(version_number, repo, conf, meta_repo):
@@ -291,7 +287,7 @@ def finish_release(version_number, repo, conf, meta_repo):
     def _changelog_process():
         with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
             git.checkout_default_branch(repo, pull=True)
-            log_string = _get_log_string(version_number_pieces, version_number)
+            log_string = _get_log_string(version_obj)
             categories = repo.get_local_config().get(
                 'categories', config.default_changelog_categories)
             create_github_release(repo, log_string, version_number,

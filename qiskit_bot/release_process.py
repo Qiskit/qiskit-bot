@@ -21,6 +21,7 @@ import shutil
 import subprocess
 
 import fasteners
+from packaging.version import parse
 import github
 
 from qiskit_bot import config
@@ -234,33 +235,31 @@ def _generate_changelog(repo, log_string, categories, show_missing=False):
     return changelog
 
 
-def create_github_release(repo, log_string, version_number, categories):
+def create_github_release(repo, log_string, version_number, categories,
+                          prerelease=False):
     changelog = _generate_changelog(repo, log_string, categories)
     release_name = repo.name + ' ' + version_number
-    repo.gh_repo.create_git_release(version_number, release_name, changelog)
+    repo.gh_repo.create_git_release(version_number, release_name, changelog,
+                                    prerelease=prerelease)
 
 
-def _get_log_string(version_number_pieces):
-    version_number = '.'.join(version_number_pieces)
+def _get_log_string(version_obj):
+    # If a second prerelease show log from first
+    if version_obj.is_prerelease and version_obj.pre[1] > 1:
+        old_version = (
+            f"{version_obj.base_version}{version_obj.pre[0]}"
+            f"{version_obj.pre[1] - 1}"
+        )
     # If a patch release log between 0.A.X..0.A.X-1
-    if int(version_number_pieces[2]) > 0:
-        old_version_string = '%s.%s.%s' % (
-            version_number_pieces[0],
-            version_number_pieces[1],
-            int(version_number_pieces[2]) - 1)
-        log_string = '%s...%s' % (
-            version_number,
-            old_version_string)
+    elif version_obj.micro > 0:
+        old_version = (
+            f"{version_obj.epoch}.{version_obj.minor}."
+            f"{version_obj.micro - 1}"
+        )
     # If a minor release log between 0.X.0..0.X-1.0
     else:
-        old_version_string = '%s.%s.%s' % (
-            version_number_pieces[0],
-            int(version_number_pieces[1]) - 1,
-            0)
-        log_string = '%s...%s' % (
-            version_number,
-            old_version_string)
-    return log_string
+        old_version = f"{version_obj.epoch}.{version_obj.minor - 1}.0"
+    return f"{version_obj}...{old_version}"
 
 
 def finish_release(version_number, repo, conf, meta_repo):
@@ -268,7 +267,10 @@ def finish_release(version_number, repo, conf, meta_repo):
     working_dir = conf.get('working_dir')
     lock_dir = os.path.join(working_dir, 'lock')
     repo_config = repo.repo_config
-    version_number_pieces = version_number.split('.')
+    version_obj = parse(version_number)
+    is_prerelease = version_obj.is_prerelease
+    is_postrelease = version_obj.is_postrelease
+    version_number_pieces = version_obj.base_version.split('.')
     branch_number = '.'.join(version_number_pieces[:2])
 
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
@@ -285,14 +287,15 @@ def finish_release(version_number, repo, conf, meta_repo):
     def _changelog_process():
         with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
             git.checkout_default_branch(repo, pull=True)
-            log_string = _get_log_string(version_number_pieces)
+            log_string = _get_log_string(version_obj)
             categories = repo.get_local_config().get(
                 'categories', config.default_changelog_categories)
             create_github_release(repo, log_string, version_number,
-                                  categories)
+                                  categories, is_prerelease)
             git.checkout_default_branch(repo, pull=True)
 
-    multiprocessing.Process(target=_changelog_process).start()
+    if not is_postrelease:
+        multiprocessing.Process(target=_changelog_process).start()
 
     def _meta_process():
         with fasteners.InterProcessLock(os.path.join(lock_dir,
@@ -301,6 +304,6 @@ def finish_release(version_number, repo, conf, meta_repo):
             git.checkout_default_branch(meta_repo, pull=True)
 
     # Only bump the metapackage for tracked/required packages optional extra
-    # versions are not pinned
-    if not repo.repo_config.get('optional_package'):
+    # versions are not pinned and if not a pre-release
+    if not repo.repo_config.get('optional_package') and not is_prerelease:
         multiprocessing.Process(target=_meta_process).start()

@@ -16,6 +16,7 @@ import os
 import unittest
 
 import fixtures
+from packaging.version import parse
 
 from qiskit_bot import config
 from qiskit_bot import release_process
@@ -851,18 +852,29 @@ qiskit-terra==0.16.0
         self.generate_mock.called_once_with(meta_repo)
 
     def test_get_log_string(self):
-        version_pieces = ['0', '10', '2']
+        version_obj = parse("0.10.2")
         self.assertEqual('0.10.2...0.10.1',
-                         release_process._get_log_string(version_pieces))
-        version_pieces = ['0', '3', '0']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.3.0")
         self.assertEqual('0.3.0...0.2.0',
-                         release_process._get_log_string(version_pieces))
-        version_pieces = ['0', '3', '25']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.3.25")
         self.assertEqual('0.3.25...0.3.24',
-                         release_process._get_log_string(version_pieces))
-        version_pieces = ['0', '25', '0']
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.25.0")
         self.assertEqual('0.25.0...0.24.0',
-                         release_process._get_log_string(version_pieces))
+                         release_process._get_log_string(version_obj))
+
+    def test_get_log_string_prerelease(self):
+        version_obj = parse("0.25.0rc1")
+        self.assertEqual('0.25.0rc1...0.24.0',
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.25.0rc2")
+        self.assertEqual('0.25.0rc2...0.25.0rc1',
+                         release_process._get_log_string(version_obj))
+        version_obj = parse("0.25.0b1")
+        self.assertEqual('0.25.0b1...0.24.0',
+                         release_process._get_log_string(version_obj))
 
     @unittest.mock.patch.object(release_process, 'git')
     @unittest.mock.patch.object(release_process, 'create_github_release')
@@ -1683,3 +1695,98 @@ qiskit-terra==0.16.1
         meta_repo.gh_repo.create_pull.assert_called_once_with(
             'Bump Meta', base='main', head='bump_meta', body=body)
         self.generate_mock.called_once_with(meta_repo)
+
+    @unittest.mock.patch.object(release_process, 'git')
+    @unittest.mock.patch.object(release_process, 'create_github_release')
+    @unittest.mock.patch.object(release_process, 'bump_meta')
+    def test_finish_prerelease(self, bump_meta_mock, github_release_mock,
+                               git_mock):
+        meta_repo = unittest.mock.MagicMock()
+        meta_repo.repo_config = {}
+        meta_repo.name = 'qiskit'
+        repo = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        repo.repo_config = {'branch_on_release': True}
+        repo.get_local_config = lambda: {}
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch.object(
+                release_process, 'multiprocessing'
+        ) as mp_mock:
+            mp_mock.Process = ProcessMock
+            release_process.finish_release('0.12.0rc1', repo, conf, meta_repo)
+        git_mock.create_branch.assert_called_once_with(
+            "stable/0.12", "0.12.0rc1", repo, push=True
+        )
+        github_release_mock.assert_called_once_with(
+            repo, '0.12.0rc1...0.11.0', '0.12.0rc1',
+            config.default_changelog_categories, True)
+        bump_meta_mock.assert_not_called()
+
+    @unittest.mock.patch.object(release_process, 'git')
+    @unittest.mock.patch.object(release_process, 'create_github_release')
+    @unittest.mock.patch.object(release_process, 'bump_meta')
+    def test_finish_release_with_pre_existing_branch(self, bump_meta_mock,
+                                                     github_release_mock,
+                                                     git_mock):
+        meta_repo = unittest.mock.MagicMock()
+        meta_repo.repo_config = {}
+        meta_repo.name = 'qiskit'
+        repo = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        # After a pre-release we've already created a stable branch so we
+        # should create a bump meta pr and not create a branch.
+        fake_branch = unittest.mock.MagicMock()
+        fake_branch.name = "stable/0.12"
+        repo.gh_repo.get_branches.return_value = [fake_branch]
+        repo.repo_config = {'branch_on_release': True}
+        repo.get_local_config = lambda: {}
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch.object(
+                release_process, 'multiprocessing'
+        ) as mp_mock:
+            mp_mock.Process = ProcessMock
+            release_process.finish_release('0.12.0', repo, conf, meta_repo)
+        git_mock.create_branch.assert_not_called()
+        bump_meta_mock.called_once_with(meta_repo, repo, '0.12.0')
+        github_release_mock.assert_called_once_with(
+            repo, '0.12.0...0.11.0', '0.12.0',
+            config.default_changelog_categories, False)
+
+    @unittest.mock.patch.object(release_process, 'git')
+    @unittest.mock.patch.object(release_process, 'create_github_release')
+    @unittest.mock.patch.object(release_process, 'bump_meta')
+    def test_finish_prerelease_with_pre_existing_branch(self, bump_meta_mock,
+                                                        github_release_mock,
+                                                        git_mock):
+        meta_repo = unittest.mock.MagicMock()
+        meta_repo.repo_config = {}
+        meta_repo.name = 'qiskit'
+        repo = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        # After a pre-release we've already created a stable branch so we
+        # should create a bump meta pr and not create a branch.
+        fake_branch = unittest.mock.MagicMock()
+        fake_branch.name = "stable/0.12"
+        repo.gh_repo.get_branches.return_value = [fake_branch]
+        repo.repo_config = {'branch_on_release': True}
+        repo.get_local_config = lambda: {}
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch.object(
+                release_process, 'multiprocessing'
+        ) as mp_mock:
+            mp_mock.Process = ProcessMock
+            release_process.finish_release('0.12.0rc2', repo, conf, meta_repo)
+        bump_meta_mock.assert_not_called()
+        github_release_mock.assert_called_once_with(
+            repo, '0.12.0rc2...0.12.0rc1', '0.12.0rc2',
+            config.default_changelog_categories, True)
+        git_mock.create_branch.assert_not_called()
+
+
+class ProcessMock:
+
+    def __init__(self, target=None):
+        self.target = target
+
+    def start(self):
+        self.target()

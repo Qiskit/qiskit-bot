@@ -152,17 +152,15 @@ def on_pull_event(data):
         pr = REPOS[repo_name].gh_repo.get_pull(pr_number)
         if repo_name in REPOS:
             if data['pull_request']['author_association'] != 'MEMBER':
-                # tag PR with 'community PR' label & notify appropriate reviewers
+                # tag PR with 'community PR' label & notify reviewers
                 labels = pr.get_labels()
                 label_names = [label.name for label in labels]
                 if "Community PR" not in label_names:
                     pr.add_to_labels("Community PR")
-                    pr.create_review_request(team_reviewers="community-reviewers")
-            
+                    pr.create_review_request(
+                        team_reviewers="community-reviewers")
             notifications.trigger_notifications(pr_number,
                                                 REPOS[repo_name], CONFIG)
-                
-
 
 
 @WEBHOOK.hook(event_type='pull_request_review')

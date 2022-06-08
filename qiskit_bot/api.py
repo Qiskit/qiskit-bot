@@ -140,7 +140,7 @@ def on_pull_event(data):
                 with fasteners.InterProcessLock(
                     os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
                                  META_REPO.name)):
-                    # Delete github branhc:
+                    # Delete github branch:
                     META_REPO.gh_repo.get_git_ref(
                         "heads/" 'bump_meta').delete()
                     # Delete local branch
@@ -149,9 +149,20 @@ def on_pull_event(data):
     if data['action'] == 'opened':
         repo_name = data['repository']['full_name']
         pr_number = data['pull_request']['number']
+        pr = REPOS[repo_name].gh_repo.get_pull(pr_number)
         if repo_name in REPOS:
+            if data['pull_request']['author_association'] != 'MEMBER':
+                # tag PR with 'community PR' label & notify appropriate reviewers
+                labels = pr.get_labels()
+                label_names = [label.name for label in labels]
+                if "Community PR" not in label_names:
+                    pr.add_to_labels("Community PR")
+                    pr.create_review_request(team_reviewers="community-reviewers")
+            
             notifications.trigger_notifications(pr_number,
                                                 REPOS[repo_name], CONFIG)
+                
+
 
 
 @WEBHOOK.hook(event_type='pull_request_review')

@@ -23,6 +23,7 @@ import github_webhook
 
 from qiskit_bot import config
 from qiskit_bot import git
+from qiskit_bot import community
 from qiskit_bot import notifications
 from qiskit_bot import release_process
 from qiskit_bot import repos
@@ -149,16 +150,8 @@ def on_pull_event(data):
     if data['action'] == 'opened':
         repo_name = data['repository']['full_name']
         pr_number = data['pull_request']['number']
-        pr = REPOS[repo_name].gh_repo.get_pull(pr_number)
         if repo_name in REPOS:
-            if data['pull_request']['author_association'] != 'MEMBER':
-                # tag PR with 'community PR' label & notify reviewers
-                labels = pr.get_labels()
-                label_names = [label.name for label in labels]
-                if "Community PR" not in label_names:
-                    pr.add_to_labels("Community PR")
-                    pr.create_review_request(
-                        team_reviewers="community-reviewers")
+            community.add_community_label(data, REPOS[repo_name])
             notifications.trigger_notifications(pr_number,
                                                 REPOS[repo_name], CONFIG)
 

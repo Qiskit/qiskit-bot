@@ -13,19 +13,17 @@
 # that they have been altered from the originals.
 
 MONITORED_REPOS = ['qiskit-terra']
+EXCLUDED_USER_TYPES = ['Bot', 'Organization']
 
 
 def add_community_label(pr_data, repo):
     """Add community label to PR when author not associated with core team"""
     if repo.name in MONITORED_REPOS:
         # check if PR was authored by soemone outside core repo team
-        if pr_data['pull_request']['author_association'] != 'MEMBER':
-            # fetch PR metadata
-            pr = repo.gh_repo.get_pull(pr_data['pull_request']['number'])
-            # tag PR with 'community PR' label & notify reviewers
-            labels = pr.get_labels()
+        if (pr_data['pull_request']['author_association'] != 'MEMBER') and (pr_data['pull_request']['user']['type'] not in EXCLUDED_USER_TYPES):
+            # get labels for PR
+            labels = pr_data['pull_request']['labels']
             label_names = [label['name'] for label in labels]
+            # tag PR with 'Community PR' label & notify reviewers
             if "Community PR" not in label_names:
-                pr.add_to_labels("Community PR")
-                pr.create_review_request(
-                    team_reviewers=["community-reviewers"])
+                pr_data['pull_request'].add_to_labels("Community PR")

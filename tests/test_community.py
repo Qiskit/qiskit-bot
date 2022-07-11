@@ -38,7 +38,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
-                {'name': 'test_label_1'}, 
+                {'name': 'test_label_1'},
                 {'name': 'test_label_2'}
             ]}}
 
@@ -111,7 +111,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
 
         gh_mock.get_pull.assert_not_called()
         pr_mock.add_to_labels.assert_not_called()
-    
+
     @unittest.mock.patch("multiprocessing.Process")
     def test_user_is_bot(self, sub_mock):
         repo = unittest.mock.MagicMock()

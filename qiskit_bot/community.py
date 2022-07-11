@@ -22,7 +22,7 @@ def add_community_label(pr_data, repo):
         # check if PR was authored by soemone outside core repo team
         if (pr_data['pull_request']['author_association'] != 'MEMBER'
             ) and (pr_data['pull_request']['user']['type']
-            not in EXCLUDED_USER_TYPES):
+                   not in EXCLUDED_USER_TYPES):
             # fetch label data
             labels = pr_data['pull_request']['labels']
             label_names = [label['name'] for label in labels]

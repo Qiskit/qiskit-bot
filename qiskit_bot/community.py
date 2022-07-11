@@ -20,7 +20,8 @@ def add_community_label(pr_data, repo):
     """Add community label to PR when author not associated with core team"""
     if repo.name in MONITORED_REPOS:
         # check if PR was authored by soemone outside core repo team
-        if (pr_data['pull_request']['author_association'] != 'MEMBER') and (pr_data['pull_request']['user']['type'] not in EXCLUDED_USER_TYPES):
+        if (pr_data['pull_request']['author_association'] != 'MEMBER'
+        ) and (pr_data['pull_request']['user']['type'] not in EXCLUDED_USER_TYPES):
             # fetch label data
             labels = pr_data['pull_request']['labels']
             label_names = [label['name'] for label in labels]

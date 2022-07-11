@@ -34,7 +34,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
-            'author_association': None, 
+            'author_association': None,
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
@@ -55,11 +55,11 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
-            'author_association': None, 
+            'author_association': None,
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
-                {'name': 'test_label_1'}, 
+                {'name': 'test_label_1'},
                 {'name': 'test_label_2'}
             ]}}
 
@@ -77,11 +77,11 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
-            'author_association': 'MEMBER', 
+            'author_association': 'MEMBER',
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
-                {'name': 'test_label_1'}, 
+                {'name': 'test_label_1'},
                 {'name': 'test_label_2'}
             ]}}
 
@@ -99,11 +99,11 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
-            'author_association': None, 
+            'author_association': None,
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
-                {'name': 'Community PR'}, 
+                {'name': 'Community PR'},
                 {'name': 'test_label_2'}
             ]}}
 
@@ -121,11 +121,11 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
-            'author_association': None, 
+            'author_association': None,
             'number': 1234,
             'user': {'type': 'Bot'},
             'labels': [
-                {'name': 'Community PR'}, 
+                {'name': 'Community PR'},
                 {'name': 'test_label_2'}
             ]}}
 

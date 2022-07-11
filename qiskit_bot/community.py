@@ -21,9 +21,10 @@ def add_community_label(pr_data, repo):
     if repo.name in MONITORED_REPOS:
         # check if PR was authored by soemone outside core repo team
         if (pr_data['pull_request']['author_association'] != 'MEMBER') and (pr_data['pull_request']['user']['type'] not in EXCLUDED_USER_TYPES):
-            # get labels for PR
+            # fetch label data
             labels = pr_data['pull_request']['labels']
             label_names = [label['name'] for label in labels]
-            # tag PR with 'Community PR' label & notify reviewers
+            # tag PR with 'community PR's
             if "Community PR" not in label_names:
-                pr_data['pull_request'].add_to_labels("Community PR")
+                pr = repo.gh_repo.get_pull(pr_data['pull_request']['number'])
+                pr.add_to_labels("Community PR")

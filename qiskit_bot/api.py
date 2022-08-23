@@ -23,6 +23,7 @@ import github_webhook
 
 from qiskit_bot import config
 from qiskit_bot import git
+from qiskit_bot import community
 from qiskit_bot import notifications
 from qiskit_bot import release_process
 from qiskit_bot import repos
@@ -140,7 +141,7 @@ def on_pull_event(data):
                 with fasteners.InterProcessLock(
                     os.path.join(os.path.join(CONFIG['working_dir'], 'lock'),
                                  META_REPO.name)):
-                    # Delete github branhc:
+                    # Delete github branch:
                     META_REPO.gh_repo.get_git_ref(
                         "heads/" 'bump_meta').delete()
                     # Delete local branch
@@ -150,6 +151,7 @@ def on_pull_event(data):
         repo_name = data['repository']['full_name']
         pr_number = data['pull_request']['number']
         if repo_name in REPOS:
+            community.add_community_label(data, REPOS[repo_name])
             notifications.trigger_notifications(pr_number,
                                                 REPOS[repo_name], CONFIG)
 

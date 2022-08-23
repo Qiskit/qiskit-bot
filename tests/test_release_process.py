@@ -960,7 +960,8 @@ qiskit-terra==0.16.0
 
         repo.gh_repo.get_pull = fake_get_pull
         repo.repo_config = {'branch_on_release': True}
-        fake_log = """5a7f41344 Tune performance of optimize_1q_decomposition (#5682)
+        fake_log = """
+5a7f41344 Tune performance of optimize_1q_decomposition (#5682)
 6e2542243 Change collect_1q_runs return for performance (#5685)
 25eb58a29 Add unroll step to level2 passmanager optimization loop (#5671)
 """

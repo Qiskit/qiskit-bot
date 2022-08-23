@@ -12,13 +12,13 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-MONITORED_REPOS = ['qiskit-terra']
 EXCLUDED_USER_TYPES = ['Bot', 'Organization']
 
 
 def add_community_label(pr_data, repo):
     """Add community label to PR when author not associated with core team"""
-    if repo.name in MONITORED_REPOS:
+    # check repo is monitored by community review team
+    if repo.repo_config.get('uses_community_label'):
         # check if PR was authored by soemone outside core repo team
         if (pr_data['pull_request']['author_association'] != 'MEMBER'
             ) and (pr_data['pull_request']['user']['type']

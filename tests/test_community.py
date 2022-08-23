@@ -32,6 +32,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         gh_mock = unittest.mock.MagicMock()
         repo.name = 'qiskit-terra'
         repo.gh_repo = gh_mock
+        repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
             'author_association': None,
@@ -53,6 +54,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         gh_mock = unittest.mock.MagicMock()
         repo.name = 'qiskit-nature'
         repo.gh_repo = gh_mock
+        repo.repo_config = {'uses_community_label': False}
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
             'author_association': None,
@@ -75,6 +77,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         gh_mock = unittest.mock.MagicMock()
         repo.name = 'qiskit-terra'
         repo.gh_repo = gh_mock
+        repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
             'author_association': 'MEMBER',
@@ -97,6 +100,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         gh_mock = unittest.mock.MagicMock()
         repo.name = 'qiskit-terra'
         repo.gh_repo = gh_mock
+        repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
             'author_association': None,
@@ -119,6 +123,7 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         gh_mock = unittest.mock.MagicMock()
         repo.name = 'qiskit-terra'
         repo.gh_repo = gh_mock
+        repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
         data = {'pull_request': {
             'author_association': None,

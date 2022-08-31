@@ -151,7 +151,8 @@ def on_pull_event(data):
         repo_name = data['repository']['full_name']
         pr_number = data['pull_request']['number']
         if repo_name in REPOS:
-            community.add_community_label(data, REPOS[repo_name])
+            community.add_community_label(data["pull_request"],
+                                          REPOS[repo_name])
             notifications.trigger_notifications(pr_number,
                                                 REPOS[repo_name], CONFIG)
 

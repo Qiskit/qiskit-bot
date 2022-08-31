@@ -17,16 +17,15 @@ EXCLUDED_USER_TYPES = ['Bot', 'Organization']
 
 def add_community_label(pr_data, repo):
     """Add community label to PR when author not associated with core team"""
-    # check repo is monitored by community review team
-    if repo.repo_config.get('uses_community_label'):
-        # check if PR was authored by soemone outside core repo team
-        if (pr_data['pull_request']['author_association'] != 'MEMBER'
-            ) and (pr_data['pull_request']['user']['type']
-                   not in EXCLUDED_USER_TYPES):
-            # fetch label data
-            labels = pr_data['pull_request']['labels']
-            label_names = [label['name'] for label in labels]
-            # tag PR with 'community PR's
-            if "Community PR" not in label_names:
-                pr = repo.gh_repo.get_pull(pr_data['pull_request']['number'])
-                pr.add_to_labels("Community PR")
+    if any((
+        not repo.repo_config.get("uses_community_label", False),
+        pr_data["user"]["type"] in EXCLUDED_USER_TYPES,
+        "Community PR" in [label["name"] for label in pr_data["labels"]],
+    )):
+        return
+    # We need to use the bot's API key rather than public data to know if the
+    # user is a private member of the organisation.  PyGitHub doesn't expose
+    # the 'author_association' attribute as part of the typed interface.
+    pr = repo.gh_repo.get_pull(pr_data["number"])
+    if pr.raw_data["author_association"] not in ("MEMBER", "OWNER"):
+        pr.add_to_labels("Community PR")

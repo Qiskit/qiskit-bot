@@ -34,14 +34,13 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
-        data = {'pull_request': {
-            'author_association': None,
+        data = {
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
                 {'name': 'test_label_1'},
                 {'name': 'test_label_2'}
-            ]}}
+            ]}
 
         community.add_community_label(data, repo)
         gh_mock.get_pull.assert_called_once_with(1234)
@@ -56,14 +55,13 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         repo.repo_config = {'uses_community_label': False}
         gh_mock.get_pull.return_value = pr_mock
-        data = {'pull_request': {
-            'author_association': None,
+        data = {
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
                 {'name': 'test_label_1'},
                 {'name': 'test_label_2'}
-            ]}}
+            ]}
 
         community.add_community_label(data, repo)
 
@@ -78,19 +76,19 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.name = 'qiskit-terra'
         repo.gh_repo = gh_mock
         repo.repo_config = {'uses_community_label': True}
+        pr_mock.raw_data = {"author_association": "MEMBER"}
         gh_mock.get_pull.return_value = pr_mock
-        data = {'pull_request': {
-            'author_association': 'MEMBER',
+        data = {
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
                 {'name': 'test_label_1'},
                 {'name': 'test_label_2'}
-            ]}}
+            ]}
 
         community.add_community_label(data, repo)
 
-        gh_mock.get_pull.assert_not_called()
+        gh_mock.get_pull.assert_called_once()
         pr_mock.add_to_labels.assert_not_called()
 
     @unittest.mock.patch("multiprocessing.Process")
@@ -102,14 +100,13 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
-        data = {'pull_request': {
-            'author_association': None,
+        data = {
             'number': 1234,
             'user': {'type': 'User'},
             'labels': [
                 {'name': 'Community PR'},
                 {'name': 'test_label_2'}
-            ]}}
+            ]}
 
         community.add_community_label(data, repo)
 
@@ -125,16 +122,43 @@ class TestCommunity(fixtures.TestWithFixtures, unittest.TestCase):
         repo.gh_repo = gh_mock
         repo.repo_config = {'uses_community_label': True}
         gh_mock.get_pull.return_value = pr_mock
-        data = {'pull_request': {
-            'author_association': None,
+        data = {
             'number': 1234,
             'user': {'type': 'Bot'},
             'labels': [
                 {'name': 'Community PR'},
                 {'name': 'test_label_2'}
-            ]}}
+            ]}
 
         community.add_community_label(data, repo)
 
         gh_mock.get_pull.assert_not_called()
+        pr_mock.add_to_labels.assert_not_called()
+
+    @unittest.mock.patch("multiprocessing.Process")
+    def test_user_is_private_member(self, sub_mock):
+        """The data fed to the bot by the webhook is unprivileged, and may
+        consider the user to be a contributor if their membership of the
+        organisation is private.  The privileged response from `get_pull`
+        should contain the correct information, though."""
+        repo = unittest.mock.MagicMock()
+        pr_mock = unittest.mock.MagicMock()
+        gh_mock = unittest.mock.MagicMock()
+        repo.name = 'qiskit-terra'
+        repo.gh_repo = gh_mock
+        repo.repo_config = {'uses_community_label': True}
+        pr_mock.raw_data = {"author_association": "MEMBER"}
+        gh_mock.get_pull.return_value = pr_mock
+        data = {
+            'author_association': "CONTRIBUTOR",
+            'number': 1234,
+            'user': {'type': 'User'},
+            'labels': [
+                {'name': 'test_label_1'},
+                {'name': 'test_label_2'}
+            ]}
+
+        community.add_community_label(data, repo)
+
+        gh_mock.get_pull.assert_called_once()
         pr_mock.add_to_labels.assert_not_called()

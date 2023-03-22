@@ -18,7 +18,6 @@ import multiprocessing
 import os
 import re
 import shutil
-import subprocess
 
 import fasteners
 from packaging.version import parse
@@ -31,31 +30,6 @@ from qiskit_bot import config
 from qiskit_bot import git
 
 LOG = logging.getLogger(__name__)
-
-
-def _regenerate_authors(repo):
-    try:
-        LOG.info('Regenerating authors list')
-        res = subprocess.run(['python', 'tools/generate_authors.py'],
-                             capture_output=True, check=True,
-                             cwd=repo.local_path)
-        LOG.debug('generate_authors called\nstdout:\n%s\nstderr:\n%s' % (
-            res.stdout, res.stderr))
-    except subprocess.CalledProcessError as e:
-        LOG.exception("Failed to generate_authors\nstdout:\n%s\nstderr:\n%s"
-                      % (e.stdout, e.stderr))
-        return
-    try:
-        LOG.info('Regenerating bibtex file')
-        res = subprocess.run(['python', 'tools/generate_bibtex.py'],
-                             capture_output=True, check=True,
-                             cwd=repo.local_path)
-        LOG.debug('generate_bibtex called\nstdout:\n%s\nstderr:\n%s' % (
-            res.stdout, res.stderr))
-    except subprocess.CalledProcessError as e:
-        LOG.exception("Failed to generate_authors\nstdout:\n%s\nstderr:\n%s"
-                      % (e.stdout, e.stderr))
-        return
 
 
 def _update_versions_everywhere(repo, new_version_number, from_main=False, stable_branch=None):
@@ -253,8 +227,6 @@ def bump_meta(meta_repo, repo, version_number):
     buf.seek(0)
     with open(docs_conf_path, 'w') as fd:
         shutil.copyfileobj(buf, fd)
-
-    _regenerate_authors(meta_repo)
 
     body = """Bump the meta repo version to include:
 

@@ -235,8 +235,11 @@ def _get_log_string(version_obj):
     return f"{version_obj}...{old_version}"
 
 
-# This helper function must be a top-level function to be pickable for `multiprocessing`.
-def _finish_release__changelog_process(version_number, lock_dir, repo, version_obj, is_prerelease):
+# This helper function must be a top-level function to be pickable for
+# `multiprocessing`.
+def _finish_release__changelog_process(
+    version_number, lock_dir, repo, version_obj, is_prerelease
+):
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
         git.checkout_default_branch(repo, pull=True)
         log_string = _get_log_string(version_obj)
@@ -247,7 +250,8 @@ def _finish_release__changelog_process(version_number, lock_dir, repo, version_o
         git.checkout_default_branch(repo, pull=True)
 
 
-# This helper function must be a top-level function to be pickable for `multiprocessing`.
+# This helper function must be a top-level function to be pickable for
+# `multiprocessing`.
 def _finish_release__meta_process(version_number, lock_dir, repo, meta_repo):
     with fasteners.InterProcessLock(os.path.join(lock_dir,
                                                  meta_repo.name)):
@@ -292,6 +296,10 @@ def finish_release(version_number, repo, conf, meta_repo):
     # versions are not pinned and if not a pre-release
     if not repo.repo_config.get('optional_package') and not is_prerelease:
         _meta_process = partial(
-            _finish_release__meta_process, version_number, lock_dir, repo, meta_repo
+            _finish_release__meta_process,
+            version_number,
+            lock_dir,
+            repo,
+            meta_repo,
         )
         multiprocessing.Process(target=_meta_process).start()

@@ -82,5 +82,6 @@ def trigger_notifications(pr_number, repo, conf):
                         buf.write("- %s\n" % user)
                 body = buf.getvalue()
             pr.create_issue_comment(body)
+
     if notifications_config or always_notify:
         multiprocessing.Process(target=_process_notification).start()

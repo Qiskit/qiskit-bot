@@ -66,6 +66,41 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
 
     @unittest.mock.patch("multiprocessing.Process")
+    def test_no_prelude_for_team_mbembers(self, sub_mock):
+        repo = unittest.mock.MagicMock()
+        local_config = {
+            "notifications": {
+                ".*": ["'@user1'", "'@user2'"]
+            }
+        }
+        pr_mock = unittest.mock.MagicMock()
+        pr_mock.raw_data = {"author_association": "MEMBER"}
+        pr_mock.get_files.return_value = [
+            FakeFile('file1.txt'),
+            FakeFile('file2.py')
+        ]
+        gh_mock = unittest.mock.MagicMock()
+        gh_mock.get_pull.return_value = pr_mock
+        repo.name = 'test'
+        repo.local_config = local_config
+        repo.get_local_config = unittest.mock.MagicMock(
+            return_value=local_config
+        )
+        repo.gh_repo = gh_mock
+        conf = {'working_dir': self.temp_dir.path}
+        with unittest.mock.patch('qiskit_bot.git.checkout_default_branch'):
+            notifications.trigger_notifications(1234, repo, conf)
+        sub_mock.assert_called_once()
+        inner_func = sub_mock.call_args_list[0][1]['target']
+        inner_func()
+        expected_body = (
+            "\nOne or more of the the following people are requested to "
+            "review this:\n- '@user1'\n- '@user2'\n"
+        )
+        gh_mock.get_pull.assert_called_once_with(1234)
+        pr_mock.create_issue_comment.assert_called_once_with(expected_body)
+
+    @unittest.mock.patch("multiprocessing.Process")
     def test_multiple_overlapping_file_notifications(self, sub_mock):
         repo = unittest.mock.MagicMock()
         local_config = {

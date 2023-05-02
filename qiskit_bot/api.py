@@ -147,14 +147,18 @@ def on_pull_event(data):
                     # Delete local branch
                     git.checkout_default_branch(META_REPO)
                     git.delete_local_branch('bump_meta', META_REPO)
-    if data['action'] == 'opened':
+
+    if data['action'] in ('opened', 'ready_for_review'):
         repo_name = data['repository']['full_name']
         pr_number = data['pull_request']['number']
         if repo_name in REPOS:
-            community.add_community_label(data["pull_request"],
-                                          REPOS[repo_name])
-            notifications.trigger_notifications(pr_number,
-                                                REPOS[repo_name], CONFIG)
+            community.add_community_label(
+                data["pull_request"], REPOS[repo_name]
+            )
+            if not data['pull_request']['draft']:
+                notifications.trigger_notifications(
+                    pr_number, REPOS[repo_name], CONFIG
+                )
 
 
 @WEBHOOK.hook(event_type='pull_request_review')

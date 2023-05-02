@@ -72,7 +72,12 @@ def trigger_notifications(pr_number, repo, conf):
         if notify_list or always_notify:
             prelude = local_config.get("notification_prelude", DEFAULT_PRELUDE)
             with io.StringIO() as buf:
-                buf.write(prelude)
+                # Team members don't get the prelude to make the message
+                # less chatty.
+                if pr.raw_data["author_association"] not in (
+                    "MEMBER", "OWNER"
+                ):
+                    buf.write(prelude)
                 if notify_list:
                     buf.write(
                         "\nOne or more of the the following people are "
@@ -82,5 +87,6 @@ def trigger_notifications(pr_number, repo, conf):
                         buf.write("- %s\n" % user)
                 body = buf.getvalue()
             pr.create_issue_comment(body)
+
     if notifications_config or always_notify:
         multiprocessing.Process(target=_process_notification).start()

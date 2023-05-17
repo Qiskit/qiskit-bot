@@ -24,6 +24,11 @@ from qiskit_bot import release_process
 from . import fake_meta  # noqa
 
 
+class PicklableMagicMock(unittest.mock.MagicMock):
+    def __reduce__(self):
+        return (unittest.mock.MagicMock, ())
+
+
 class TestReleaseProcess(fixtures.TestWithFixtures, unittest.TestCase):
 
     def setUp(self):
@@ -862,10 +867,10 @@ qiskit-terra==0.16.0
     @unittest.mock.patch.object(release_process, 'bump_meta')
     def test_finish_release(self, bump_meta_mock, github_release_mock,
                             git_mock):
-        meta_repo = unittest.mock.MagicMock()
+        meta_repo = PicklableMagicMock()
         meta_repo.repo_config = {}
         meta_repo.name = 'qiskit'
-        repo = unittest.mock.MagicMock()
+        repo = PicklableMagicMock()
         repo.name = 'qiskit-terra'
         repo.repo_config = {'branch_on_release': False}
         conf = {'working_dir': self.temp_dir.path}
@@ -882,10 +887,10 @@ qiskit-terra==0.16.0
     def test_finish_release_with_branch(self, bump_meta_mock,
                                         github_release_mock,
                                         git_mock):
-        meta_repo = unittest.mock.MagicMock()
+        meta_repo = PicklableMagicMock()
         meta_repo.repo_config = {}
         meta_repo.name = 'qiskit'
-        repo = unittest.mock.MagicMock()
+        repo = PicklableMagicMock()
         repo.name = 'qiskit-terra'
         repo.gh_repo.get_branches.return_value = []
         repo.repo_config = {'branch_on_release': True}

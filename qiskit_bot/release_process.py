@@ -18,6 +18,7 @@ import multiprocessing
 import os
 import re
 import shutil
+from functools import partial
 
 import fasteners
 from packaging.version import parse
@@ -234,6 +235,30 @@ def _get_log_string(version_obj):
     return f"{version_obj}...{old_version}"
 
 
+# This helper function must be a top-level function to be pickable for
+# `multiprocessing`.
+def _finish_release__changelog_process(
+    version_number, lock_dir, repo, version_obj, is_prerelease
+):
+    with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
+        git.checkout_default_branch(repo, pull=True)
+        log_string = _get_log_string(version_obj)
+        categories = repo.get_local_config().get(
+            'categories', config.default_changelog_categories)
+        create_github_release(repo, log_string, version_number,
+                              categories, is_prerelease)
+        git.checkout_default_branch(repo, pull=True)
+
+
+# This helper function must be a top-level function to be pickable for
+# `multiprocessing`.
+def _finish_release__meta_process(version_number, lock_dir, repo, meta_repo):
+    with fasteners.InterProcessLock(os.path.join(lock_dir,
+                                                 meta_repo.name)):
+        bump_meta(meta_repo, repo, version_number)
+        git.checkout_default_branch(meta_repo, pull=True)
+
+
 def finish_release(version_number, repo, conf, meta_repo):
     """Do the post tag release processes."""
     working_dir = conf.get('working_dir')
@@ -256,26 +281,25 @@ def finish_release(version_number, repo, conf, meta_repo):
                 git.checkout_default_branch(repo, pull=True)
                 git.create_branch(branch_name, version_number, repo, push=True)
 
-    def _changelog_process():
-        with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
-            git.checkout_default_branch(repo, pull=True)
-            log_string = _get_log_string(version_obj)
-            categories = repo.get_local_config().get(
-                'categories', config.default_changelog_categories)
-            create_github_release(repo, log_string, version_number,
-                                  categories, is_prerelease)
-            git.checkout_default_branch(repo, pull=True)
-
     if not is_postrelease:
+        _changelog_process = partial(
+            _finish_release__changelog_process,
+            version_number,
+            lock_dir,
+            repo,
+            version_obj,
+            is_prerelease,
+        )
         multiprocessing.Process(target=_changelog_process).start()
-
-    def _meta_process():
-        with fasteners.InterProcessLock(os.path.join(lock_dir,
-                                                     meta_repo.name)):
-            bump_meta(meta_repo, repo, version_number)
-            git.checkout_default_branch(meta_repo, pull=True)
 
     # Only bump the metapackage for tracked/required packages optional extra
     # versions are not pinned and if not a pre-release
     if not repo.repo_config.get('optional_package') and not is_prerelease:
+        _meta_process = partial(
+            _finish_release__meta_process,
+            version_number,
+            lock_dir,
+            repo,
+            meta_repo,
+        )
         multiprocessing.Process(target=_meta_process).start()

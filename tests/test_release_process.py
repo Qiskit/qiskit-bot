@@ -76,7 +76,7 @@ qiskit-terra==0.16.1
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), 'release = "0.20.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -138,7 +138,7 @@ qiskit-terra==0.16.1
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), 'release = "0.20.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -204,7 +204,7 @@ qiskit-terra==0.16.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -260,7 +260,7 @@ qiskit-terra==0.9.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    self.assertEqual(line.strip(), 'release = "0.15.2"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -323,7 +323,7 @@ qiskit-terra==0.9.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.2'")
+                    self.assertEqual(line.strip(), 'release = "0.15.2"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -389,7 +389,7 @@ qiskit-terra==0.16.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    self.assertEqual(line.strip(), 'release = "0.15.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -454,7 +454,7 @@ qiskit-terra==0.16.1
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    self.assertEqual(line.strip(), 'release = "0.16.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -510,7 +510,7 @@ qiskit-terra==0.17.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.21.0'")
+                    self.assertEqual(line.strip(), 'release = "0.21.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -572,7 +572,7 @@ qiskit-terra==0.17.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.21.0'")
+                    self.assertEqual(line.strip(), 'release = "0.21.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -639,7 +639,7 @@ qiskit-terra==0.17.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -695,7 +695,7 @@ qiskit-terra==0.10.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    self.assertEqual(line.strip(), 'release = "0.16.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -758,7 +758,7 @@ qiskit-terra==0.10.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    self.assertEqual(line.strip(), 'release = "0.16.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -824,7 +824,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.21.0'")
+                    self.assertEqual(line.strip(), 'release = "0.21.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -995,7 +995,7 @@ qiskit-terra==0.16.0
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1044,7 +1044,7 @@ qiskit-terra==0.16.0
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1098,7 +1098,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1143,7 +1143,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    self.assertEqual(line.strip(), 'release = "0.15.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1193,7 +1193,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    self.assertEqual(line.strip(), 'release = "0.15.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1247,7 +1247,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    self.assertEqual(line.strip(), 'release = "0.15.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1302,7 +1302,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.16.0'")
+                    self.assertEqual(line.strip(), 'release = "0.16.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1348,7 +1348,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1397,7 +1397,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1452,7 +1452,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.0'")
+                    self.assertEqual(line.strip(), 'release = "0.20.0"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1497,7 +1497,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    self.assertEqual(line.strip(), 'release = "0.15.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1547,7 +1547,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.15.1'")
+                    self.assertEqual(line.strip(), 'release = "0.15.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1601,7 +1601,7 @@ qiskit-terra==0.16.0
                   'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), 'release = "0.20.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')
@@ -1654,7 +1654,7 @@ qiskit-terra==0.16.1
         with open(os.path.join(self.temp_dir.path, 'docs/conf.py'), 'r') as fd:
             for line in fd:
                 if 'release = ' in line:
-                    self.assertEqual(line.strip(), "release = '0.20.1'")
+                    self.assertEqual(line.strip(), 'release = "0.20.1"')
                     break
             else:
                 self.fail('Release not updated in doc config')

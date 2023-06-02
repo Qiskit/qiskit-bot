@@ -102,7 +102,7 @@ def bump_meta(meta_repo, repo, version_number):
     with open(docs_conf_path, 'r') as fd:
         for line in fd:
             if line.startswith('release = '):
-                old_version = re.search("release = '(.*)'", line)[1]
+                old_version = re.search('release = "(.*)"', line)[1]
                 old_version = old_version.strip('",')
                 old_version_pieces = old_version.split('.')
                 new_version_pieces = new_meta_version.split('.')

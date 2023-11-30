@@ -1794,10 +1794,10 @@ qiskit-terra==0.16.1
                 release_process, 'multiprocessing'
         ) as mp_mock:
             mp_mock.Process = ProcessMock
-            release_process.finish_release('0.12.0pre1', repo, conf, meta_repo)
+            release_process.finish_release('0.12.0b1', repo, conf, meta_repo)
         git_mock.create_branch.assert_not_called()
         github_release_mock.assert_called_once_with(
-            repo, '0.12.0pre1...0.11.0', '0.12.0pre1',
+            repo, '0.12.0b1...0.11.0', '0.12.0b1',
             config.default_changelog_categories, True)
         bump_meta_mock.assert_not_called()
 
@@ -1817,7 +1817,7 @@ qiskit-terra==0.16.1
         conf = {'working_dir': self.temp_dir.path}
 
         def tag_history(*args, **kwargs):
-            return """1.0.0pre1
+            return """1.0.0b1
 0.45.1
 0.45.0
 0.25.3
@@ -1835,10 +1835,10 @@ qiskit-terra==0.16.1
                 release_process, 'multiprocessing'
         ) as mp_mock:
             mp_mock.Process = ProcessMock
-            release_process.finish_release('1.0.0pre1', repo, conf, meta_repo)
+            release_process.finish_release('1.0.0b1', repo, conf, meta_repo)
         git_mock.create_branch.assert_not_called()
         github_release_mock.assert_called_once_with(
-            repo, '1.0.0pre1...0.45.1', '1.0.0pre1',
+            repo, '1.0.0b1...0.45.1', '1.0.0b1',
             config.default_changelog_categories, True)
         bump_meta_mock.assert_not_called()
 
@@ -1859,7 +1859,7 @@ qiskit-terra==0.16.1
 
         def tag_history(*args, **kwargs):
             return """1.0.0rc1
-1.0.0pre1
+1.0.0b1
 0.45.1
 0.45.0
 0.25.3

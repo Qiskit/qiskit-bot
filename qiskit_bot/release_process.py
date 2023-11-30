@@ -288,7 +288,7 @@ def finish_release(version_number, repo, conf, meta_repo):
             repo_branches = [x.name for x in repo.gh_repo.get_branches()]
             if int(version_number_pieces[2]) == 0 and \
                     branch_name not in repo_branches:
-                if is_prerelease and "rc" not in version_number:
+                if is_prerelease and version_obj.pre[0] != "rc":
                     pass
                 else:
                     git.checkout_default_branch(repo, pull=True)

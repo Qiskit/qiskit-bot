@@ -216,7 +216,7 @@ def create_github_release(repo, log_string, version_number, categories,
                                     prerelease=prerelease)
 
 
-def _get_log_string(version_obj):
+def _get_log_string(version_obj, version_number, repo):
     # If a second prerelease show log from first
     if version_obj.is_prerelease and version_obj.pre[1] > 1:
         old_version = (
@@ -229,10 +229,21 @@ def _get_log_string(version_obj):
             f"{version_obj.epoch}.{version_obj.minor}."
             f"{version_obj.micro - 1}"
         )
+    # If a major version log between X.0.0..x-1.y.z
+    elif version_obj.major >= 1 and version_obj.minor == 0:
+        tags = git.get_tags(repo)
+        previous_major = version_obj.major - 1
+        for tag in tags.splitlines():
+            tag_version = parse(tag)
+            if tag_version.is_prerelease:
+                continue
+            if tag_version.major == previous_major:
+                old_version = tag
+                break
     # If a minor release log between 0.X.0..0.X-1.0
     else:
         old_version = f"{version_obj.epoch}.{version_obj.minor - 1}.0"
-    return f"{version_obj}...{old_version}"
+    return f"{version_number}...{old_version}"
 
 
 # This helper function must be a top-level function to be pickable for
@@ -242,7 +253,7 @@ def _finish_release__changelog_process(
 ):
     with fasteners.InterProcessLock(os.path.join(lock_dir, repo.name)):
         git.checkout_default_branch(repo, pull=True)
-        log_string = _get_log_string(version_obj)
+        log_string = _get_log_string(version_obj, version_number, repo)
         categories = repo.get_local_config().get(
             'categories', config.default_changelog_categories)
         create_github_release(repo, log_string, version_number,
@@ -278,8 +289,12 @@ def finish_release(version_number, repo, conf, meta_repo):
             repo_branches = [x.name for x in repo.gh_repo.get_branches()]
             if int(version_number_pieces[2]) == 0 and \
                     branch_name not in repo_branches:
-                git.checkout_default_branch(repo, pull=True)
-                git.create_branch(branch_name, version_number, repo, push=True)
+                if is_prerelease and version_obj.pre[0] != "rc":
+                    pass
+                else:
+                    git.checkout_default_branch(repo, pull=True)
+                    git.create_branch(branch_name, version_number, repo,
+                                      push=True)
 
     if not is_postrelease:
         _changelog_process = partial(

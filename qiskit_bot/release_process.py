@@ -229,7 +229,7 @@ def _get_log_string(version_obj, version_number, repo):
             f"{version_obj.epoch}.{version_obj.minor}."
             f"{version_obj.micro - 1}"
         )
-    # If a minor release log between 0.X.0..0.X-1.0
+    # If a major version log between X.0.0..x-1.y.z
     elif version_obj.major >= 1 and version_obj.minor == 0:
         tags = git.get_tags(repo)
         previous_major = version_obj.major - 1
@@ -240,6 +240,7 @@ def _get_log_string(version_obj, version_number, repo):
             if tag_version.major == previous_major:
                 old_version = tag
                 break
+    # If a minor release log between 0.X.0..0.X-1.0
     else:
         old_version = f"{version_obj.epoch}.{version_obj.minor - 1}.0"
     return f"{version_number}...{old_version}"

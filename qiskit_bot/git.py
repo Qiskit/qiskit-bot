@@ -84,6 +84,20 @@ def get_git_log(repo, sha1):
         return ''
 
 
+def get_tags(repo):
+    """Get a list of tags in creation order separated by newlines."""
+    LOG.info('Querying git tags for %s' % repo.local_path)
+    try:
+        res = subprocess.run(['git', 'tag', '--sort=-creatordate'],
+                             capture_output=True, check=True, encoding="UTF8",
+                             cwd=repo.local_path)
+        return res.stdout
+    except subprocess.CalledProcessError as e:
+        LOG.exception('Failed to get git log\nstdout:\n%s\nstderr:\n%s'
+                      % (e.stdout, e.stderr))
+        return ''
+
+
 def clean_repo(repo):
     cmd = ['git', 'clean', '-fdX']
     try:

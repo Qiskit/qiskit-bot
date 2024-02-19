@@ -81,7 +81,7 @@ def trigger_notifications(pr_number, repo, conf):
                 if notify_list:
                     buf.write(
                         "\nOne or more of the the following people are "
-                        "requested to review this:\n"
+                        "relevant to this code:\n"
                     )
                     for user in sorted(notify_list):
                         buf.write("- %s\n" % user)

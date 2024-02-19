@@ -59,8 +59,8 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
         expected_body = notifications.DEFAULT_PRELUDE + (
-            "\nOne or more of the the following people are requested to "
-            "review this:\n- @user1\n- @user2\n"
+            "\nOne or more of the the following people are relevant to "
+            "this code:\n- @user1\n- @user2\n"
         )
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
@@ -94,8 +94,8 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
         expected_body = (
-            "\nOne or more of the the following people are requested to "
-            "review this:\n- '@user1'\n- '@user2'\n"
+            "\nOne or more of the the following people are relevant to "
+            "this code:\n- '@user1'\n- '@user2'\n"
         )
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
@@ -129,8 +129,8 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
         expected_body = notifications.DEFAULT_PRELUDE + (
-            "\nOne or more of the the following people are requested to "
-            "review this:\n- @user1\n- @user2\n- @user3\n"
+            "\nOne or more of the the following people are relevant to "
+            "this code:\n- @user1\n- @user2\n- @user3\n"
         )
 
         gh_mock.get_pull.assert_called_once_with(1234)
@@ -196,8 +196,8 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         inner_func = sub_mock.call_args_list[0][1]['target']
         inner_func()
         expected_body = notifications.DEFAULT_PRELUDE + (
-            "\nOne or more of the the following people are requested to "
-            "review this:\n- @user1\n- @user2\n"
+            "\nOne or more of the the following people are relevant to "
+            "this code:\n- @user1\n- @user2\n"
         )
         gh_mock.get_pull.assert_called_once_with(1234)
         pr_mock.create_issue_comment.assert_called_once_with(expected_body)
@@ -330,7 +330,7 @@ class TestNotifications(fixtures.TestWithFixtures, unittest.TestCase):
         inner_func()
         expected_body = """This is my prelude
 
-One or more of the the following people are requested to review this:
+One or more of the the following people are relevant to this code:
 - @user1
 - @user2
 """

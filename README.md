@@ -1,5 +1,7 @@
 # qiskit-bot
 
+qiskit-bot is a bot to automate some tasks in the [Qiskit GitHub organization](https://github.com/Qiskit/), like tagging maintainers in issues and handling releases.
+
 This repo contains a wsgi app for running for GitHub automation of the 
 Qiskit organization. It performs many functions to automate the workflow of the
 various aspect of managing the repositories in the Qiskit GitHub organization.

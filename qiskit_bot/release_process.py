@@ -226,7 +226,7 @@ def _get_log_string(version_obj, version_number, repo):
     # If a patch release log between 0.A.X..0.A.X-1
     elif version_obj.micro > 0:
         old_version = (
-            f"{version_obj.epoch}.{version_obj.minor}."
+            f"{version_obj.major}.{version_obj.minor}."
             f"{version_obj.micro - 1}"
         )
     # If a major version log between X.0.0..x-1.y.z
@@ -240,9 +240,9 @@ def _get_log_string(version_obj, version_number, repo):
             if tag_version.major == previous_major:
                 old_version = tag
                 break
-    # If a minor release log between 0.X.0..0.X-1.0
+    # If a minor release log between Y.X.0..Y.X-1.0
     else:
-        old_version = f"{version_obj.epoch}.{version_obj.minor - 1}.0"
+        old_version = f"{version_obj.major}.{version_obj.minor - 1}.0"
     return f"{version_number}...{old_version}"
 
 

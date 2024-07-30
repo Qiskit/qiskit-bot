@@ -869,7 +869,8 @@ qiskit-terra==0.16.0
         )
         # Tests for >= 1.x.x
         self.useFixture(
-            fake_meta.FakeMetaRepo(self.temp_dir, "1.1.0", terra_version="1.1.1")
+            fake_meta.FakeMetaRepo(self.temp_dir, "1.1.0",
+                                   terra_version="1.1.1")
         )
         # Mock tags for 0.45-1.1.1
         git_mock.get_tags.return_value = """0.46.2

@@ -837,32 +837,81 @@ qiskit-terra==0.16.0
         existing_pull_mock.edit.assert_called_once_with(
             body='Fake old body\nqiskit-terra==0.16.0')
 
-    def test_get_log_string(self):
+    @unittest.mock.patch.object(release_process, 'git')
+    def test_get_log_string(self, git_mock):
         version_obj = parse("0.10.2")
-        self.assertEqual('0.10.2...0.10.1',
-                         release_process._get_log_string(
-                             version_obj,
-                             "0.10.2",
-                             unittest.mock.MagicMock()
-                         ))
+        self.assertEqual(
+            "0.10.2...0.10.1",
+            release_process._get_log_string(
+                version_obj, "0.10.2", unittest.mock.MagicMock()
+            ),
+        )
         version_obj = parse("0.3.0")
-        self.assertEqual('0.3.0...0.2.0',
-                         release_process._get_log_string(
-                             version_obj,
-                             "0.3.0",
-                             unittest.mock.MagicMock()))
+        self.assertEqual(
+            "0.3.0...0.2.0",
+            release_process._get_log_string(
+                version_obj, "0.3.0", unittest.mock.MagicMock()
+            ),
+        )
         version_obj = parse("0.3.25")
-        self.assertEqual('0.3.25...0.3.24',
-                         release_process._get_log_string(
-                             version_obj,
-                             "0.3.25",
-                             unittest.mock.MagicMock()))
+        self.assertEqual(
+            "0.3.25...0.3.24",
+            release_process._get_log_string(
+                version_obj, "0.3.25", unittest.mock.MagicMock()
+            ),
+        )
         version_obj = parse("0.25.0")
-        self.assertEqual('0.25.0...0.24.0',
-                         release_process._get_log_string(
-                             version_obj,
-                             "0.25.0",
-                             unittest.mock.MagicMock()))
+        self.assertEqual(
+            "0.25.0...0.24.0",
+            release_process._get_log_string(
+                version_obj, "0.25.0", unittest.mock.MagicMock()
+            ),
+        )
+        # Tests for >= 1.x.x
+        self.useFixture(
+            fake_meta.FakeMetaRepo(self.temp_dir, "1.1.0", terra_version="1.1.1")
+        )
+        # Mock tags for 0.45-1.1.1
+        git_mock.get_tags.return_value = """0.46.2
+        1.1.1
+        0.46.2
+        1.1.1
+        1.1.0
+        1.1.0rc1
+        0.46.1
+        1.0.2
+        1.0.1
+        1.0.0
+        1.0.0rc1
+        0.46.0
+        0.45.3
+        0.45.2
+        1.0.0b1
+        0.45.1
+        0.45.0
+       """
+        mock_repo = unittest.mock.MagicMock()
+        mock_repo.name = "qiskit"
+        mock_repo.repo_name = "Qiskit/qiskit"
+        mock_repo.repo_config = {"optional_package": False}
+        mock_repo.local_path = self.temp_dir.path
+        print(mock_repo.local_path)
+        print(mock_repo.gh_repo.get_tags())
+        version_obj = parse("1.0.0")
+        self.assertEqual(
+            "1.0.0...0.46.2",
+            release_process._get_log_string(version_obj, "1.0.0", mock_repo),
+        )
+        version_obj = parse("1.1.0")
+        self.assertEqual(
+            "1.1.0...1.0.0",
+            release_process._get_log_string(version_obj, "1.1.0", mock_repo),
+        )
+        version_obj = parse("1.1.1")
+        self.assertEqual(
+            "1.1.1...1.1.0",
+            release_process._get_log_string(version_obj, "1.1.1", mock_repo),
+        )
 
     def test_get_log_string_prerelease(self):
         version_obj = parse("0.25.0rc1")

@@ -896,8 +896,6 @@ qiskit-terra==0.16.0
         mock_repo.repo_name = "Qiskit/qiskit"
         mock_repo.repo_config = {"optional_package": False}
         mock_repo.local_path = self.temp_dir.path
-        print(mock_repo.local_path)
-        print(mock_repo.gh_repo.get_tags())
         version_obj = parse("1.0.0")
         self.assertEqual(
             "1.0.0...0.46.2",

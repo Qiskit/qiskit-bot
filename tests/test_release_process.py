@@ -884,11 +884,14 @@ qiskit-terra==0.16.0
 0.45.1
 0.45.0
 """
+        # Prepare mock repo
         mock_repo = unittest.mock.MagicMock()
         mock_repo.name = "qiskit"
         mock_repo.repo_name = "Qiskit/qiskit"
         mock_repo.repo_config = {"optional_package": False}
         mock_repo.local_path = self.temp_dir.path
+
+        # Test for major release 1.0.0
         version_obj = parse("1.0.0")
         self.assertEqual(
             "1.0.0...0.46.0",
@@ -926,20 +929,75 @@ qiskit-terra==0.16.0
         mock_repo.repo_name = "Qiskit/qiskit"
         mock_repo.repo_config = {"optional_package": False}
         mock_repo.local_path = self.temp_dir.path
-        version_obj = parse("1.0.0")
-        self.assertEqual(
-            "1.0.0...0.46.2",
-            release_process._get_log_string(version_obj, "1.0.0", mock_repo),
-        )
+
+        # Test minor release 1.1.0
         version_obj = parse("1.1.0")
         self.assertEqual(
             "1.1.0...1.0.0",
             release_process._get_log_string(version_obj, "1.1.0", mock_repo),
         )
+
+        # Test bugfix release 1.1.1
         version_obj = parse("1.1.1")
         self.assertEqual(
             "1.1.1...1.1.0",
             release_process._get_log_string(version_obj, "1.1.1", mock_repo),
+        )
+
+    @unittest.mock.patch.object(release_process, 'git')
+    def test_get_log_string_post_2_x_x(self, git_mock):
+        # Tests for >= 2.x.x
+        self.useFixture(
+            fake_meta.FakeMetaRepo(self.temp_dir, "1.1.0",
+                                   terra_version="1.1.1")
+        )
+        # Mock tags for 2.0.0rc1-1.3.0rc1
+        git_mock.get_tags.return_value = """2.0.0
+2.0.0.rc1
+1.4.0
+1.4.0rc1
+1.3.2
+1.3.1
+1.3.0
+1.2.2
+1.3.0rc1
+"""
+        # Prepare mock repository
+        mock_repo = unittest.mock.MagicMock()
+        mock_repo.name = "qiskit"
+        mock_repo.repo_name = "Qiskit/qiskit"
+        mock_repo.repo_config = {"optional_package": False}
+        mock_repo.local_path = self.temp_dir.path
+
+        # Test for release candidate 1.4.0rc1
+        version_obj = parse("1.4.0rc1")
+        self.assertEqual(
+            "1.4.0rc1...1.3.0",
+            release_process._get_log_string(version_obj, "1.4.0rc1",
+                                            mock_repo),
+        )
+
+        # Test for minor release 1.4.0
+        version_obj = parse("1.4.0")
+        self.assertEqual(
+            "1.4.0...1.3.0",
+            release_process._get_log_string(version_obj, "1.4.0", mock_repo),
+        )
+
+        # Test for major release candidate 2.0.0rc1
+        version_obj = parse("2.0.0rc1")
+        self.assertEqual(
+            "2.0.0rc1...1.4.0",
+            release_process._get_log_string(version_obj, "2.0.0rc1",
+                                            mock_repo),
+        )
+
+        # Test for major release 2.0.0
+        version_obj = parse("2.0.0")
+        self.assertEqual(
+            "2.0.0...1.4.0",
+            release_process._get_log_string(version_obj, "2.0.0",
+                                            mock_repo),
         )
 
     def test_get_log_string_prerelease(self):
